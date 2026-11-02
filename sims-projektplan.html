@@ -1,0 +1,507 @@
+<title>SIMS Projektplan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column, wide blocks (timeline, tables) scroll inside their own container */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --fg: #1b2230;
+  --muted: #5b6577;
+  --line: #dde1e8;
+  --accent: #1f5f8b;
+  --accent-soft: #e3eef6;
+  --warn: #a35a00;
+  --warn-soft: #fbefdc;
+  --c1: #1f5f8b; --c2: #6a4c93; --c3: #2c7a4b; --c4: #a35a00; --c5: #8a5a6b;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12161d; --surface: #1a2029; --fg: #e4e8ef; --muted: #9aa4b5; --line: #2c3442;
+  --accent: #6fb3e0; --accent-soft: #1d3346; --warn: #f0b060; --warn-soft: #3a2c17;
+  --c1: #4f97c9; --c2: #9a7cc4; --c3: #4fa874; --c4: #cf8a33; --c5: #b88597;
+  color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #12161d; --surface: #1a2029; --fg: #e4e8ef; --muted: #9aa4b5; --line: #2c3442;
+  --accent: #6fb3e0; --accent-soft: #1d3346; --warn: #f0b060; --warn-soft: #3a2c17;
+  --c1: #4f97c9; --c2: #9a7cc4; --c3: #4fa874; --c4: #cf8a33; --c5: #b88597;
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 40px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 48px; }
+header { display: flex; flex-direction: column; gap: 10px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font-size: clamp(28px, 5vw, 38px); line-height: 1.15; margin: 0; text-wrap: balance; font-weight: 700; }
+h2 { font-size: 22px; margin: 0; text-wrap: balance; font-weight: 600; }
+h3 { font-size: 16px; margin: 0; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+.lead { color: var(--muted); font-size: 16px; }
+.small { color: var(--muted); font-size: 14px; }
+section { display: flex; flex-direction: column; gap: 16px; }
+.note { background: var(--warn-soft); color: var(--fg); border-left: 3px solid var(--warn); padding: 12px 16px; border-radius: 4px; max-width: 72ch; }
+.note strong { color: var(--warn); }
+code, .mono { font-family: var(--mono); font-size: .9em; }
+code { background: var(--accent-soft); padding: 1px 5px; border-radius: 3px; }
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 500; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.nowrap { white-space: nowrap; }
+.who { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; white-space: nowrap; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.tag { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 1px 7px; border-radius: 10px; background: var(--warn-soft); color: var(--warn); white-space: nowrap; }
+
+/* Timeline */
+.gantt { display: grid; grid-template-columns: 160px repeat(4, minmax(120px, 1fr)); min-width: 660px; font-size: 13px; }
+.gantt > div { border-bottom: 1px solid var(--line); padding: 8px 6px; }
+.gantt .hd { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; border-left: 1px solid var(--line); }
+.gantt .hd:first-child { border-left: 0; }
+.gantt .rowlabel { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.gantt .bar { border-radius: 4px; padding: 5px 8px; color: #fff; font-size: 12px; line-height: 1.3; margin: 0 2px; align-self: center; }
+.gantt .freeze { background: repeating-linear-gradient(135deg, transparent 0 6px, var(--warn-soft) 6px 12px); }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+pre.code { margin: 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.55; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 12px; overflow-x: auto; }
+
+.check { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.check li { display: flex; gap: 10px; align-items: baseline; }
+.check li::before { content: ""; width: 12px; height: 12px; border: 1.5px solid var(--muted); border-radius: 2px; flex: none; transform: translateY(2px); }
+.pts { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-left: auto; white-space: nowrap; padding-left: 12px; }
+.mermaid { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; overflow-x: auto; margin: 0; }
+.svc { display: flex; flex-direction: column; gap: 12px; }
+.svc h3 { font-family: var(--mono); font-size: 14px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
+.ep-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; font-family: var(--mono); font-size: 14px; font-weight: 500; }
+.method { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 3px; background: var(--accent-soft); color: var(--accent); }
+.codes { font-size: 13px; color: var(--muted); }
+.codes code { white-space: nowrap; }
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Security Incident Management System · Teamplan</div>
+  <h1>SIMS Projektplan</h1>
+  <p class="lead">Zwei Wochen, fünf Personen. Wir bauen eine kleine, saubere Version, die alle Punkte der Angabe abdeckt, und nicht mehr.</p>
+</header>
+
+<section>
+  <h2>Umfang</h2>
+  <div class="box">
+    <ul class="list">
+      <li><b>Auth:</b> Login prüft Benutzername und Passwort-Hash und gibt Id, Name und Rolle zurück. User anlegen, deaktivieren, auflisten.</li>
+      <li><b>Tickets:</b> Incident anlegen, bearbeiten, schließen, auflisten. Eskalation erhöht das Feld <code>EscalationLevel</code> um eins.</li>
+      <li><b>Logging:</b> Die anderen Services schreiben Log-Einträge, die Liste ist im Frontend sichtbar.</li>
+      <li><b>Frontend:</b> Login, Incident-Liste und -Formular, User-Liste, Log-Liste.</li>
+      <li><b>Docker:</b> alles startet mit <code>docker compose up</code>.</li>
+      <li><b>SAST:</b> Semgrep-Lauf nach Angabe, Ergebnisse in der README.</li>
+    </ul>
+    <p class="small"><b>Fertig, wenn:</b> die Demo einmal komplett durchläuft. Ideen für später kommen nur in den Roadmap-Abschnitt der README.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Architektur</h2>
+  <p>Drei kleine Microservices in ASP.NET Core (.NET 10). Jeder Service hat seine eigene Datenbank in einem eigenen Container. Auth und Tickets nutzen SQL Server, angelegt mit Entity Framework Code-First. Das Logging speichert in Redis. Jede Datenbank hängt in einem eigenen Netz, das nur ihr Service erreicht.</p>
+<pre class="mermaid">
+flowchart LR
+  WEB["web<br/>Frontend"]
+  subgraph APP["Netz: app"]
+    AUTH["auth-api"]
+    TICKET["ticket-api"]
+    LOG["logging-api"]
+  end
+  subgraph N1["Netz: auth-db"]
+    ADB[("auth-db<br/>SQL Server")]
+  end
+  subgraph N2["Netz: ticket-db"]
+    TDB[("ticket-db<br/>SQL Server")]
+  end
+  subgraph N3["Netz: log-db"]
+    REDIS[("redis")]
+  end
+  WEB --> AUTH
+  WEB --> TICKET
+  WEB --> LOG
+  AUTH --> ADB
+  TICKET --> TDB
+  LOG --> REDIS
+  AUTH -. Log .-> LOG
+  TICKET -. Log .-> LOG
+</pre>
+  <div class="scroll"><table>
+    <thead><tr><th>Container</th><th>Inhalt</th><th>Netze</th></tr></thead>
+    <tbody>
+      <tr><td class="mono nowrap">web</td><td>Web-Frontend (LLM-generiert)</td><td class="mono">app</td></tr>
+      <tr><td class="mono nowrap">auth-api</td><td>Login, Benutzerverwaltung</td><td class="mono">app, auth-db</td></tr>
+      <tr><td class="mono nowrap">ticket-api</td><td>Incidents, Eskalation</td><td class="mono">app, ticket-db</td></tr>
+      <tr><td class="mono nowrap">logging-api</td><td>Log-Einträge schreiben und lesen</td><td class="mono">app, log-db</td></tr>
+      <tr><td class="mono nowrap">auth-db</td><td>SQL Server, Datenbank <code>SimsAuth</code>, Volume</td><td class="mono">auth-db</td></tr>
+      <tr><td class="mono nowrap">ticket-db</td><td>SQL Server, Datenbank <code>SimsTickets</code>, Volume</td><td class="mono">ticket-db</td></tr>
+      <tr><td class="mono nowrap">redis</td><td>Log-Einträge, AOF-Persistenz und Volume</td><td class="mono">log-db</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><strong>Arbeitsspeicher:</strong> Jeder SQL-Server-Container braucht etwa 2 GB RAM. Mit zwei davon sollte Docker Desktop mindestens 6 GB bekommen. In der Compose-Datei <code>MSSQL_MEMORY_LIMIT_MB</code> setzen, damit es auf schwächeren Laptops läuft.</div>
+</section>
+
+<section>
+  <h2>Rollen im Team</h2>
+  <p>Namen bitte eintragen. Lucas hat wenig Zeit und übernimmt deshalb nur Gerüst, Reviews und Demo.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Person</th><th>Verantwortung</th><th>Liefert</th></tr></thead>
+    <tbody>
+      <tr><td><span class="who"><span class="dot" style="background:var(--c1)"></span>Lucas (Lead, teilaktiv)</span></td><td>Grundgerüst, Reviews, Integration, Demo</td><td>Repo, leere Solution, Compose-Grundgerüst mit Netzen, Board mit allen Tasks</td></tr>
+      <tr><td><span class="who"><span class="dot" style="background:var(--c2)"></span>Dev A</span></td><td>Auth-Service</td><td>Login mit Hash, User anlegen/deaktivieren/auflisten, Seed-Admin, Log-Aufrufe</td></tr>
+      <tr><td><span class="who"><span class="dot" style="background:var(--c3)"></span>Dev B</span></td><td>Ticket-Service</td><td>Incident-Modell, anlegen/bearbeiten/schließen/eskalieren, Liste, Seed-Daten, Log-Aufrufe</td></tr>
+      <tr><td><span class="who"><span class="dot" style="background:var(--c4)"></span>Dev C</span></td><td>Logging-Service und README</td><td>Log-API mit Redis, README-Gerüst, ER-Diagramm, Roadmap; sammelt die Abschnitte der anderen ein</td></tr>
+      <tr><td><span class="who"><span class="dot" style="background:var(--c5)"></span>Dev D</span></td><td>Frontend und SAST</td><td>Frontend mit LLM, Semgrep-Läufe, Auswertung der Ergebnisse für die README</td></tr>
+    </tbody>
+  </table></div>
+  <p>Jede Person legt ihr eigenes Projekt in der Solution an, schreibt das Dockerfile und trägt ihre Container in die Compose-Datei ein. Außerdem schreibt jede Person den README-Abschnitt zu ihrem Teil. Die einzelnen Tasks stehen in <code>TASKS.md</code>.</p>
+</section>
+
+<section>
+  <h2>Zeitplan</h2>
+  <div class="scroll">
+    <div class="gantt">
+      <div class="hd">Bereich</div><div class="hd">Tag 1–2</div><div class="hd">Tag 3–5</div><div class="hd">Tag 6–8</div><div class="hd">Tag 9–10</div>
+
+      <div class="rowlabel"><span class="dot" style="background:var(--c1)"></span>Lead</div>
+      <div class="bar" style="background:var(--c1)">Repo, Compose-Gerüst</div>
+      <div class="bar" style="grid-column: span 2; background:var(--c1); opacity:.75">Reviews, Hilfe</div>
+      <div class="bar" style="background:var(--c1)">Integration, Demo</div>
+
+      <div class="rowlabel"><span class="dot" style="background:var(--c2)"></span>Auth</div>
+      <div class="bar" style="background:var(--c2); opacity:.75">Projekt, Docker, DB</div>
+      <div class="bar" style="background:var(--c2)">Login, User</div>
+      <div class="bar" style="background:var(--c2); opacity:.75">Log-Aufrufe, Bugfixes</div>
+      <div class="freeze"></div>
+
+      <div class="rowlabel"><span class="dot" style="background:var(--c3)"></span>Tickets</div>
+      <div class="bar" style="background:var(--c3); opacity:.75">Projekt, Docker, DB</div>
+      <div class="bar" style="background:var(--c3)">CRUD, Eskalation</div>
+      <div class="bar" style="background:var(--c3); opacity:.75">Log-Aufrufe, Bugfixes</div>
+      <div class="freeze"></div>
+
+      <div class="rowlabel"><span class="dot" style="background:var(--c4)"></span>Logging, README</div>
+      <div class="bar" style="background:var(--c4); opacity:.75">Projekt, Docker, README-Gerüst</div>
+      <div class="bar" style="background:var(--c4)">Log-API, Redis</div>
+      <div class="bar" style="background:var(--c4); opacity:.75">ER-Diagramm, Roadmap</div>
+      <div class="bar" style="background:var(--c4)">README fertig</div>
+
+      <div class="rowlabel"><span class="dot" style="background:var(--c5)"></span>Frontend, SAST</div>
+      <div class="bar" style="background:var(--c5); opacity:.75">Semgrep, Frontend-Projekt</div>
+      <div class="bar" style="grid-column: span 2; background:var(--c5)">Frontend</div>
+      <div class="bar" style="background:var(--c5); opacity:.75">Semgrep, Auswertung</div>
+    </div>
+  </div>
+  <p class="small">Schraffiert: Feature-Freeze. Die letzten zwei Tage gibt es nur noch Bugfixes, Doku und eine Demo-Probe.</p>
+</section>
+
+<section>
+  <h2>Schnittstellen</h2>
+  <p>Diese Absprache gilt, bis der Code steht. Danach ist Scalar die aktuelle Doku: jeder Service erzeugt mit <code>AddOpenApi()</code> ein OpenAPI-Dokument, Scalar zeigt es unter <code>/scalar</code> an und man kann die Endpoints dort direkt ausprobieren. Wer etwas an einer Schnittstelle ändern will, sagt es vorher im Teamchat, weil das Frontend davon abhängt.</p>
+  <p>Es gibt keine Token. Das Frontend merkt sich nach dem Login Id, Name und Rolle und blendet Admin-Funktionen für normale User aus. Wer die API direkt aufruft, kommt trotzdem an alles heran. Das kommt als bekannte Einschränkung in den Security-Abschnitt der README.</p>
+
+  <div class="two">
+    <div class="box">
+      <h3>Adressen</h3>
+      <div class="scroll"><table>
+        <thead><tr><th>Service</th><th>Vom Browser</th><th>Im Docker-Netz</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">web</td><td class="mono">localhost:8080</td><td class="mono">–</td></tr>
+          <tr><td class="mono">auth-api</td><td class="mono">localhost:5001</td><td class="mono">auth-api:8080</td></tr>
+          <tr><td class="mono">ticket-api</td><td class="mono">localhost:5002</td><td class="mono">ticket-api:8080</td></tr>
+          <tr><td class="mono">logging-api</td><td class="mono">localhost:5003</td><td class="mono">logging-api:8080</td></tr>
+        </tbody>
+      </table></div>
+      <p class="small">Das Frontend nutzt die Browser-Adressen. Die Services rufen das Logging über den Containernamen auf. CORS in jeder API für <code>http://localhost:8080</code> freigeben.</p>
+    </div>
+    <div class="box">
+      <h3>Regeln für alle Endpoints</h3>
+      <ul class="list">
+        <li>JSON mit Feldnamen in camelCase: <code>reporterName</code>, nicht <code>ReporterName</code>.</li>
+        <li>Enums als Text: <code>"High"</code>, nicht <code>3</code>.</li>
+        <li>Zeitangaben als ISO 8601 in UTC: <code>"2026-11-02T10:15:00Z"</code>.</li>
+        <li>Fehler immer als <code>{ "error": "Text für den User" }</code>.</li>
+        <li>Passwort-Hashes verlassen nie den Auth-Service.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="box">
+    <h3>Statuscodes</h3>
+    <div class="scroll"><table>
+      <tbody>
+        <tr><td class="mono nowrap">200 OK</td><td>Erfolg, mit Daten in der Antwort</td></tr>
+        <tr><td class="mono nowrap">201 Created</td><td>Etwas wurde neu angelegt, die Antwort enthält es</td></tr>
+        <tr><td class="mono nowrap">204 No Content</td><td>Erfolg, ohne Antwort-Body</td></tr>
+        <tr><td class="mono nowrap">400 Bad Request</td><td>Eingabe ungültig, z.B. Pflichtfeld fehlt oder Wert nicht erlaubt</td></tr>
+        <tr><td class="mono nowrap">401 Unauthorized</td><td>Login fehlgeschlagen</td></tr>
+        <tr><td class="mono nowrap">404 Not Found</td><td>Id existiert nicht</td></tr>
+        <tr><td class="mono nowrap">409 Conflict</td><td>Aktion im aktuellen Zustand nicht erlaubt, z.B. geschlossenen Incident bearbeiten</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="box">
+    <h3>Erlaubte Werte</h3>
+<pre class="code">role      "Admin" | "User"
+severity  "Low" | "Medium" | "High" | "Critical"
+status    "Open" | "InProgress" | "Closed"
+level     "Info" | "Warning" | "Error"
+escalationLevel  1 bis 3, neue Incidents starten bei 1</pre>
+  </div>
+
+  <div class="svc">
+    <h3>auth-api</h3>
+    <div class="two">
+      <div class="box">
+        <div class="ep-head"><span class="method">POST</span>/api/auth/login</div>
+        <p class="small">Prüft Benutzername und Passwort. Deaktivierte User können sich nicht anmelden.</p>
+<pre class="code">Request
+{ "username": "admin", "password": "Admin123!" }
+
+Response 200
+{ "id": 1, "username": "admin", "role": "Admin" }</pre>
+        <p class="codes"><code>400</code> Feld leer · <code>401</code> falsches Passwort, unbekannter oder deaktivierter User (immer dieselbe Meldung, damit niemand erfährt, welche Usernamen existieren)</p>
+      </div>
+      <div class="box">
+        <div class="ep-head"><span class="method">GET</span>/api/users <span class="tag">Admin</span></div>
+        <p class="small">Alle User, auch deaktivierte.</p>
+<pre class="code">Response 200
+[
+  { "id": 1, "username": "admin", "role": "Admin",
+    "isActive": true, "createdAt": "2026-11-02T08:00:00Z" }
+]</pre>
+      </div>
+      <div class="box">
+        <div class="ep-head"><span class="method">POST</span>/api/users <span class="tag">Admin</span></div>
+        <p class="small">Legt einen User an. Das Passwort wird gehasht gespeichert.</p>
+<pre class="code">Request
+{ "username": "mmuster", "password": "Sicher123!", "role": "User" }
+
+Response 201
+{ "id": 2, "username": "mmuster", "role": "User",
+  "isActive": true, "createdAt": "2026-11-02T09:00:00Z" }</pre>
+        <p class="codes"><code>400</code> Feld leer, Passwort kürzer als 8 Zeichen, Rolle ungültig · <code>409</code> Username vergeben</p>
+      </div>
+      <div class="box">
+        <div class="ep-head"><span class="method">PATCH</span>/api/users/{id}/disable <span class="tag">Admin</span></div>
+        <p class="small">Setzt <code>isActive</code> auf false. Der User wird nicht gelöscht, damit alte Incidents nachvollziehbar bleiben.</p>
+<pre class="code">Request   kein Body
+Response  204</pre>
+        <p class="codes"><code>404</code> User existiert nicht</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="svc">
+    <h3>ticket-api</h3>
+    <div class="box">
+      <h3 style="font-family:var(--sans);font-size:16px;color:var(--fg);text-transform:none;letter-spacing:0;font-weight:600">Incident-Objekt</h3>
+      <p class="small">Alle Endpoints, die ein Incident zurückgeben, liefern es in dieser Form.</p>
+<pre class="code">{
+  "id": 12,
+  "title": "Verdächtige Logins am VPN-Gateway",
+  "description": "Über 200 fehlgeschlagene Logins von einer IP in 10 Minuten.",
+  "severity": "High",
+  "status": "Open",
+  "cve": "CVE-2024-3400",          // optional, sonst null
+  "affectedSystem": "vpn-gw-01",
+  "escalationLevel": 1,
+  "reporterId": 2,
+  "reporterName": "mmuster",
+  "assigneeId": 3,                 // optional, sonst null
+  "assigneeName": "jdoe",          // optional, sonst null
+  "createdAt": "2026-11-02T10:15:00Z",
+  "closedAt": null
+}</pre>
+    </div>
+    <div class="two">
+      <div class="box">
+        <div class="ep-head"><span class="method">GET</span>/api/incidents</div>
+        <p class="small">Alle Incidents, neueste zuerst.</p>
+<pre class="code">Response 200
+[ Incident, Incident, ... ]</pre>
+      </div>
+      <div class="box">
+        <div class="ep-head"><span class="method">GET</span>/api/incidents/{id}</div>
+<pre class="code">Response 200
+Incident</pre>
+        <p class="codes"><code>404</code> Incident existiert nicht</p>
+      </div>
+      <div class="box">
+        <div class="ep-head"><span class="method">POST</span>/api/incidents</div>
+        <p class="small">Melder ist der angemeldete User. Status startet mit <code>Open</code>, Eskalationsstufe mit 1.</p>
+<pre class="code">Request
+{
+  "title": "Verdächtige Logins am VPN-Gateway",
+  "description": "Über 200 fehlgeschlagene Logins ...",
+  "severity": "High",
+  "cve": "CVE-2024-3400",
+  "affectedSystem": "vpn-gw-01",
+  "reporterId": 2,
+  "reporterName": "mmuster",
+  "assigneeId": null,
+  "assigneeName": null
+}
+
+Response 201
+Incident</pre>
+        <p class="codes"><code>400</code> Titel, Beschreibung, Schweregrad oder System fehlt; CVE nicht im Format <code>CVE-JJJJ-NNNN</code></p>
+      </div>
+      <div class="box">
+        <div class="ep-head"><span class="method">PUT</span>/api/incidents/{id}</div>
+        <p class="small">Ändert die bearbeitbaren Felder. Status hier nur <code>Open</code> oder <code>InProgress</code>, geschlossen wird über <code>/close</code>.</p>
+<pre class="code">Request
+{
+  "title": "...",
+  "description": "...",
+  "severity": "Critical",
+  "status": "InProgress",
+  "cve": "CVE-2024-3400",
+  "affectedSystem": "vpn-gw-01",
+  "assigneeId": 3,
+  "assigneeName": "jdoe"
+}
+
+Response 200
+Incident</pre>
+        <p class="codes"><code>400</code> wie beim Anlegen, oder Status <code>Closed</code> · <code>404</code> · <code>409</code> Incident ist geschlossen</p>
+      </div>
+      <div class="box">
+        <div class="ep-head"><span class="method">POST</span>/api/incidents/{id}/escalate</div>
+        <p class="small">Erhöht die Eskalationsstufe um eins.</p>
+<pre class="code">Request   kein Body
+Response 200
+Incident (escalationLevel + 1)</pre>
+        <p class="codes"><code>404</code> · <code>409</code> Incident ist geschlossen oder schon auf Stufe 3</p>
+      </div>
+      <div class="box">
+        <div class="ep-head"><span class="method">POST</span>/api/incidents/{id}/close</div>
+        <p class="small">Setzt den Status auf <code>Closed</code> und <code>closedAt</code> auf jetzt.</p>
+<pre class="code">Request   kein Body
+Response 200
+Incident</pre>
+        <p class="codes"><code>404</code> · <code>409</code> schon geschlossen</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="svc">
+    <h3>logging-api</h3>
+    <div class="two">
+      <div class="box">
+        <div class="ep-head"><span class="method">POST</span>/api/logs</div>
+        <p class="small">Wird von auth-api und ticket-api aufgerufen, nicht vom Frontend. Id und Timestamp vergibt der Logging-Service. Wenn das Logging nicht erreichbar ist, darf der aufrufende Service trotzdem nicht abstürzen.</p>
+<pre class="code">Request
+{ "level": "Info", "service": "ticket-api",
+  "message": "Incident 12 eskaliert auf Stufe 2" }
+
+Response  201, kein Body</pre>
+        <p class="codes"><code>400</code> Feld leer oder Level ungültig</p>
+      </div>
+      <div class="box">
+        <div class="ep-head"><span class="method">GET</span>/api/logs?limit=100</div>
+        <p class="small">Neueste Einträge zuerst. <code>limit</code> ist optional, Standard 100.</p>
+<pre class="code">Response 200
+[
+  { "id": "1730542500000-0",
+    "timestamp": "2026-11-02T10:15:00Z",
+    "level": "Info",
+    "service": "ticket-api",
+    "message": "Incident 12 eskaliert auf Stufe 2" }
+]</pre>
+      </div>
+    </div>
+    <div class="box">
+      <h3 style="font-family:var(--sans);font-size:16px;color:var(--fg);text-transform:none;letter-spacing:0;font-weight:600">Was geloggt wird</h3>
+      <div class="scroll"><table>
+        <thead><tr><th>Service</th><th>Ereignis</th><th>Level</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">auth-api</td><td>Login erfolgreich</td><td class="mono">Info</td></tr>
+          <tr><td class="mono">auth-api</td><td>Login fehlgeschlagen (Username, nie das Passwort)</td><td class="mono">Warning</td></tr>
+          <tr><td class="mono">auth-api</td><td>User angelegt, User deaktiviert</td><td class="mono">Info</td></tr>
+          <tr><td class="mono">ticket-api</td><td>Incident angelegt, bearbeitet, geschlossen</td><td class="mono">Info</td></tr>
+          <tr><td class="mono">ticket-api</td><td>Incident eskaliert</td><td class="mono">Warning</td></tr>
+          <tr><td class="mono">alle</td><td>Unerwarteter Fehler (Exception)</td><td class="mono">Error</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Datenmodell</h2>
+  <div class="two">
+    <div class="box">
+      <h3>auth-db: SimsAuth</h3>
+<pre class="code">User
+  Id, Username (unique), PasswordHash,
+  Role (Admin | User), IsActive, CreatedAt</pre>
+    </div>
+    <div class="box">
+      <h3>ticket-db: SimsTickets</h3>
+<pre class="code">Incident
+  Id, Title, Description,
+  Severity (Low | Medium | High | Critical),
+  Status (Open | InProgress | Closed),
+  Cve, AffectedSystem, EscalationLevel,
+  ReporterId, ReporterName,
+  AssigneeId, AssigneeName,
+  CreatedAt, ClosedAt</pre>
+    </div>
+  </div>
+  <div class="box">
+    <h3>Melder und Bearbeiter</h3>
+    <p>Melder und Bearbeiter sind User aus der Auth-Datenbank. Weil die in einem anderen Container liegt, kann die Ticket-Datenbank keinen Foreign Key auf sie setzen. <code>ReporterId</code> und <code>AssigneeId</code> sind deshalb normale Zahlen, die die Datenbank nicht prüft.</p>
+    <p>Damit die Incident-Liste Namen anzeigen kann, ohne für jede Zeile den Auth-Service zu fragen, speichert der Ticket-Service den Namen als Kopie mit. Das Frontend schickt beides mit: beim Anlegen Id und Name des angemeldeten Users als Melder, beim Zuweisen Id und Name aus der User-Liste als Bearbeiter.</p>
+    <p class="small">Diese Entscheidung kommt ins ER-Diagramm und in die README. Die automatische Erfassung durch Geräte kommt in die Roadmap.</p>
+  </div>
+</section>
+
+<section>
+  <h2>SAST mit Semgrep</h2>
+  <p>Semgrep läuft wie in der Angabe beschrieben als Docker-Container über das Repo. Dev D testet den Befehl am Anfang, lässt ihn nach Tag 8 auf dem fertigen Code laufen und bereitet die Ergebnisse für die README auf.</p>
+  <div class="box">
+    <h3>Befehl (im Repo-Ordner, PowerShell)</h3>
+<pre class="code">docker run --rm -v "${PWD}:/src" returntocorp/semgrep semgrep --config auto</pre>
+    <p class="small">In die README kommen: Anzahl der Findings, die wichtigsten davon und was damit passiert ist (behoben oder begründet, warum nicht).</p>
+  </div>
+</section>
+
+<section>
+  <h2>Arbeitsregeln</h2>
+  <ul class="list">
+    <li><b><code>main</code> ist immer lauffähig:</b> Wer <code>main</code> holt und <code>docker compose up --build</code> ausführt, bekommt alle Container ohne Fehler gestartet. Deshalb vor jedem Merge auf dem eigenen Branch <code>main</code> hereinholen, alles starten und prüfen, dass alle Container laufen. Halbfertige Features sind okay, ein Service, der beim Start abstürzt, nicht. Ist <code>main</code> doch kaputt, wird zuerst repariert oder der Merge mit <code>git revert</code> zurückgenommen.</li>
+    <li>Ein kurzer Branch pro Task, höchstens 1–2 Tage alt. Jeden Tag <code>main</code> in den eigenen Branch holen.</li>
+    <li>Kleine Pull Requests. Eine andere Person aus dem Team reviewt und mergt, am besten am selben Tag. Lucas reviewt Änderungen an Compose, Datenmodell und Schnittstellen.</li>
+    <li>Getestet wird über <code>docker compose up</code>, nicht nur in Visual Studio.</li>
+    <li>Wer eine Security-Maßnahme einbaut (Hashing, Validierung, EF statt SQL-Strings), schreibt sie in einer Zeile in den Security-Abschnitt der README.</li>
+    <li>Kurzer Check-in alle zwei bis drei Tage. Blocker sofort im Teamchat melden.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Abgabe-Checkliste</h2>
+  <div class="box">
+    <ul class="check">
+      <li>3 Microservices, jeder mit eigener Aufgabe und eigener Datenbank <span class="pts">3 Pkt</span></li>
+      <li>EF Code-First mit SQL Server, Redis für Logs <span class="pts">3 Pkt</span></li>
+      <li>Semgrep-Lauf dokumentiert, Findings behoben oder begründet <span class="pts">1 Pkt</span></li>
+      <li>Dockerfiles und <code>docker-compose.yml</code> mit getrennten Netzen <span class="pts">1 Pkt</span></li>
+      <li>README mit allen Pflichtabschnitten, inkl. Security und Roadmap <span class="pts">1 Pkt</span></li>
+      <li>Demo geprobt: Login, Incident anlegen, eskalieren, schließen, User anlegen und deaktivieren, Logs ansehen <span class="pts">1 Pkt</span></li>
+      <li>Repo-Link von einer Person über eCampus abgegeben <span class="pts">Pflicht</span></li>
+    </ul>
+  </div>
+</section>
+
+</div>

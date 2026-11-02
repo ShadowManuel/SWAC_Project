@@ -1,0 +1,32 @@
+# SIMS: alle Container für die lokale Entwicklung.
+# Jeder Service trägt seine Container in seinem Setup-Task selbst ein (A1, B1, C1, D2).
+# Vorlage für einen Service-Eintrag: siehe TASKS.md, Abschnitt "Vorlagen".
+#
+# Netze:
+#   app        Frontend und die drei APIs
+#   auth-db    nur auth-api und auth-db
+#   ticket-db  nur ticket-api und ticket-db
+#   log-db     nur logging-api und redis
+# Datenbanken bekommen keinen "ports:"-Eintrag, sie sind nur im eigenen Netz erreichbar.
+
+services:
+  # Beispiel aus dem Unterricht, nur als Anhaltspunkt. Gehört nicht zum SIMS-System.
+  simsapi:
+    build:
+      context: .
+      dockerfile: src/simsapi/Dockerfile
+    ports: ["5000:8080"]
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development   # Scalar ist im Beispiel nur in Development aktiv
+    networks: [app]
+
+networks:
+  app:
+  auth-db:
+  ticket-db:
+  log-db:
+
+volumes:
+  auth-db-data:
+  ticket-db-data:
+  redis-data:
