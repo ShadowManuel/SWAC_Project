@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SIMS Projektplan</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -74,7 +76,19 @@ pre.code { margin: 0; font-family: var(--mono); font-size: 12.5px; line-height: 
 .check li { display: flex; gap: 10px; align-items: baseline; }
 .check li::before { content: ""; width: 12px; height: 12px; border: 1.5px solid var(--muted); border-radius: 2px; flex: none; transform: translateY(2px); }
 .pts { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-left: auto; white-space: nowrap; padding-left: 12px; }
-.mermaid { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; overflow-x: auto; margin: 0; }
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; overflow-x: auto; }
+.diagram svg { display: block; width: 100%; min-width: 560px; max-width: 760px; height: auto; margin: 0 auto; }
+.d-node { fill: var(--surface); stroke: var(--fg); stroke-width: 1.2; }
+.d-net { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; stroke-dasharray: 5 4; }
+.d-db path, .d-db ellipse { fill: var(--bg); stroke: var(--fg); stroke-width: 1.2; }
+.d-line { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+.d-dash { stroke-dasharray: 5 4; }
+.d-head { fill: var(--muted); }
+.d-title { font-family: var(--mono); font-size: 14px; font-weight: 500; fill: var(--fg); }
+.d-sub { font-family: var(--sans); font-size: 12px; fill: var(--muted); }
+.d-label { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+.d-netlabel { font-family: var(--mono); font-size: 11px; fill: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+a { color: var(--accent); }
 .svc { display: flex; flex-direction: column; gap: 12px; }
 .svc h3 { font-family: var(--mono); font-size: 14px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
 .ep-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; font-family: var(--mono); font-size: 14px; font-weight: 500; }
@@ -88,7 +102,12 @@ pre.code { margin: 0; font-family: var(--mono); font-size: 12.5px; line-height: 
 <header>
   <div class="eyebrow">Security Incident Management System · Teamplan</div>
   <h1>SIMS Projektplan</h1>
-  <p class="lead">Zwei Wochen, fünf Personen. Wir bauen eine kleine, saubere Version, die alle Punkte der Angabe abdeckt, und nicht mehr.</p>
+  <p class="lead">Hey Leute, das ist alles, was ich ausgearbeitet hab: wer was übernimmt, wie die Teile zusammenhängen und wie die Schnittstellen aussehen. Damit kann jeder direkt mit seinem Teil loslegen.</p>
+  <p>Wir haben zwei Wochen und bauen eine kleine, saubere Version, die alle Punkte der Angabe abdeckt, und nicht mehr.</p>
+  <div class="box">
+    <h3>Eure Tasks</h3>
+    <p>Alle Aufgaben liegen als Issues auf unserem <a href="https://github.com/users/ShadowManuel/projects/3">GitHub-Board „SIMS“</a>. Jedes Issue hat eine Beschreibung, Akzeptanzkriterien, Testfälle und eine Definition of Done, also eine Checkliste, wann der Task wirklich fertig ist. Sobald die Rollen verteilt sind, weist euch eure Issues selbst zu und schiebt sie auf dem Board weiter, wenn ihr anfangt oder fertig seid. Welche Issues zu welcher Rolle gehören, steht unten unter „Rollen im Team“.</p>
+  </div>
 </header>
 
 <section>
@@ -109,36 +128,81 @@ pre.code { margin: 0; font-family: var(--mono); font-size: 12.5px; line-height: 
 <section>
   <h2>Architektur</h2>
   <p>Drei kleine Microservices in ASP.NET Core (.NET 10). Jeder Service hat seine eigene Datenbank in einem eigenen Container. Auth und Tickets nutzen SQL Server, angelegt mit Entity Framework Code-First. Das Logging speichert in Redis. Jede Datenbank hängt in einem eigenen Netz, das nur ihr Service erreicht.</p>
-<pre class="mermaid">
-flowchart LR
-  WEB["web<br/>Frontend"]
-  subgraph APP["Netz: app"]
-    AUTH["auth-api"]
-    TICKET["ticket-api"]
-    LOG["logging-api"]
-  end
-  subgraph N1["Netz: auth-db"]
-    ADB[("auth-db<br/>SQL Server")]
-  end
-  subgraph N2["Netz: ticket-db"]
-    TDB[("ticket-db<br/>SQL Server")]
-  end
-  subgraph N3["Netz: log-db"]
-    REDIS[("redis")]
-  end
-  WEB --> AUTH
-  WEB --> TICKET
-  WEB --> LOG
-  AUTH --> ADB
-  TICKET --> TDB
-  LOG --> REDIS
-  AUTH -. Log .-> LOG
-  TICKET -. Log .-> LOG
-</pre>
+  <div class="diagram">
+  <svg viewBox="0 0 760 420" role="img" aria-label="Architektur: Browser ruft Frontend und drei APIs auf; jede API hat ihre eigene Datenbank in einem eigenen Netz; Auth und Tickets senden Logs an die Logging-API">
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="d-head"/></marker>
+    </defs>
+
+    <!-- Browser und Frontend -->
+    <rect x="20" y="195" width="120" height="50" rx="6" class="d-node"/>
+    <text x="80" y="225" class="d-title" text-anchor="middle">Browser</text>
+    <rect x="20" y="330" width="120" height="50" rx="6" class="d-node"/>
+    <text x="80" y="352" class="d-title" text-anchor="middle">web</text>
+    <text x="80" y="369" class="d-sub" text-anchor="middle">Frontend</text>
+    <line x1="80" y1="245" x2="80" y2="326" class="d-line" marker-end="url(#arr)"/>
+    <text x="88" y="292" class="d-label">:8080</text>
+
+    <!-- Netz app -->
+    <rect x="200" y="30" width="220" height="370" rx="8" class="d-net"/>
+    <text x="214" y="50" class="d-netlabel">Netz app</text>
+
+    <rect x="230" y="62" width="160" height="56" rx="6" class="d-node"/>
+    <text x="310" y="86" class="d-title" text-anchor="middle">auth-api</text>
+    <text x="310" y="104" class="d-sub" text-anchor="middle">Login, User</text>
+
+    <rect x="230" y="192" width="160" height="56" rx="6" class="d-node"/>
+    <text x="310" y="216" class="d-title" text-anchor="middle">logging-api</text>
+    <text x="310" y="234" class="d-sub" text-anchor="middle">Logs</text>
+
+    <rect x="230" y="322" width="160" height="56" rx="6" class="d-node"/>
+    <text x="310" y="346" class="d-title" text-anchor="middle">ticket-api</text>
+    <text x="310" y="364" class="d-sub" text-anchor="middle">Incidents</text>
+
+    <!-- Browser ruft APIs -->
+    <line x1="140" y1="212" x2="226" y2="96" class="d-line" marker-end="url(#arr)"/>
+    <line x1="140" y1="220" x2="226" y2="220" class="d-line" marker-end="url(#arr)"/>
+    <line x1="140" y1="228" x2="226" y2="344" class="d-line" marker-end="url(#arr)"/>
+    <text x="186" y="88" class="d-label">:5001</text>
+    <text x="166" y="212" class="d-label">:5003</text>
+    <text x="186" y="364" class="d-label">:5002</text>
+
+    <!-- Logs -->
+    <line x1="310" y1="118" x2="310" y2="188" class="d-line d-dash" marker-end="url(#arr)"/>
+    <line x1="310" y1="322" x2="310" y2="252" class="d-line d-dash" marker-end="url(#arr)"/>
+    <text x="318" y="158" class="d-label">Logs</text>
+    <text x="318" y="292" class="d-label">Logs</text>
+
+    <!-- Datenbank-Netze -->
+    <rect x="470" y="40" width="270" height="100" rx="8" class="d-net"/>
+    <text x="484" y="60" class="d-netlabel">Netz auth-db</text>
+    <rect x="470" y="170" width="270" height="100" rx="8" class="d-net"/>
+    <text x="484" y="190" class="d-netlabel">Netz log-db</text>
+    <rect x="470" y="300" width="270" height="100" rx="8" class="d-net"/>
+    <text x="484" y="320" class="d-netlabel">Netz ticket-db</text>
+
+    <g class="d-db">
+      <path d="M560,74 v34 a70,10 0 0 0 140,0 v-34"/><ellipse cx="630" cy="74" rx="70" ry="10"/>
+      <path d="M560,204 v34 a70,10 0 0 0 140,0 v-34"/><ellipse cx="630" cy="204" rx="70" ry="10"/>
+      <path d="M560,334 v34 a70,10 0 0 0 140,0 v-34"/><ellipse cx="630" cy="334" rx="70" ry="10"/>
+    </g>
+    <text x="630" y="100" class="d-title" text-anchor="middle">auth-db</text>
+    <text x="630" y="116" class="d-sub" text-anchor="middle">SQL Server</text>
+    <text x="630" y="230" class="d-title" text-anchor="middle">redis</text>
+    <text x="630" y="246" class="d-sub" text-anchor="middle">Stream „logs“</text>
+    <text x="630" y="360" class="d-title" text-anchor="middle">ticket-db</text>
+    <text x="630" y="376" class="d-sub" text-anchor="middle">SQL Server</text>
+
+    <line x1="390" y1="90" x2="556" y2="90" class="d-line" marker-end="url(#arr)"/>
+    <line x1="390" y1="220" x2="556" y2="220" class="d-line" marker-end="url(#arr)"/>
+    <line x1="390" y1="350" x2="556" y2="350" class="d-line" marker-end="url(#arr)"/>
+  </svg>
+  </div>
+  <p class="small">Durchgezogen: Aufrufe über HTTP bzw. zur Datenbank. Gestrichelt: Log-Einträge. Die APIs sitzen gleichzeitig im Netz <code>app</code> und im Netz ihrer Datenbank; keine API erreicht die Datenbank einer anderen.</p>
   <div class="scroll"><table>
     <thead><tr><th>Container</th><th>Inhalt</th><th>Netze</th></tr></thead>
     <tbody>
-      <tr><td class="mono nowrap">web</td><td>Web-Frontend (LLM-generiert)</td><td class="mono">app</td></tr>
+      <tr><td class="mono nowrap">web</td><td>Web-Frontend (LLM-generiert). Liefert nur die Seite aus, die API-Aufrufe macht der Browser über die Ports 5001–5003.</td><td class="mono">–</td></tr>
       <tr><td class="mono nowrap">auth-api</td><td>Login, Benutzerverwaltung</td><td class="mono">app, auth-db</td></tr>
       <tr><td class="mono nowrap">ticket-api</td><td>Incidents, Eskalation</td><td class="mono">app, ticket-db</td></tr>
       <tr><td class="mono nowrap">logging-api</td><td>Log-Einträge schreiben und lesen</td><td class="mono">app, log-db</td></tr>
@@ -152,18 +216,18 @@ flowchart LR
 
 <section>
   <h2>Rollen im Team</h2>
-  <p>Namen bitte eintragen. Lucas hat wenig Zeit und übernimmt deshalb nur Gerüst, Reviews und Demo.</p>
+  <p>Wer welche Rolle übernimmt, machen wir in der Gruppe aus. Ich hab wenig Zeit und kümmere mich deshalb um das Gerüst, die Reviews und die Demo.</p>
   <div class="scroll"><table>
-    <thead><tr><th>Person</th><th>Verantwortung</th><th>Liefert</th></tr></thead>
+    <thead><tr><th>Person</th><th>Verantwortung</th><th>Liefert</th><th>Issues</th></tr></thead>
     <tbody>
-      <tr><td><span class="who"><span class="dot" style="background:var(--c1)"></span>Lucas (Lead, teilaktiv)</span></td><td>Grundgerüst, Reviews, Integration, Demo</td><td>Repo, leere Solution, Compose-Grundgerüst mit Netzen, Board mit allen Tasks</td></tr>
-      <tr><td><span class="who"><span class="dot" style="background:var(--c2)"></span>Dev A</span></td><td>Auth-Service</td><td>Login mit Hash, User anlegen/deaktivieren/auflisten, Seed-Admin, Log-Aufrufe</td></tr>
-      <tr><td><span class="who"><span class="dot" style="background:var(--c3)"></span>Dev B</span></td><td>Ticket-Service</td><td>Incident-Modell, anlegen/bearbeiten/schließen/eskalieren, Liste, Seed-Daten, Log-Aufrufe</td></tr>
-      <tr><td><span class="who"><span class="dot" style="background:var(--c4)"></span>Dev C</span></td><td>Logging-Service und README</td><td>Log-API mit Redis, README-Gerüst, ER-Diagramm, Roadmap; sammelt die Abschnitte der anderen ein</td></tr>
-      <tr><td><span class="who"><span class="dot" style="background:var(--c5)"></span>Dev D</span></td><td>Frontend und SAST</td><td>Frontend mit LLM, Semgrep-Läufe, Auswertung der Ergebnisse für die README</td></tr>
+      <tr><td><span class="who"><span class="dot" style="background:var(--c1)"></span>Lucas (Lead)</span></td><td>Grundgerüst, Reviews, Integration, Demo</td><td>Repo, Solution, Compose-Grundgerüst mit Netzen, Board mit allen Tasks</td><td class="nowrap"><a href="https://github.com/ShadowManuel/SWAC_Project/issues?q=label%3Alead">L1–L4</a></td></tr>
+      <tr><td><span class="who"><span class="dot" style="background:var(--c2)"></span>Dev A</span></td><td>Auth-Service</td><td>Login mit Hash, User anlegen/deaktivieren/auflisten, Seed-Admin, Log-Aufrufe</td><td class="nowrap"><a href="https://github.com/ShadowManuel/SWAC_Project/issues?q=label%3Aauth">A1–A6</a></td></tr>
+      <tr><td><span class="who"><span class="dot" style="background:var(--c3)"></span>Dev B</span></td><td>Ticket-Service</td><td>Incident-Modell, anlegen/bearbeiten/schließen/eskalieren, Liste, Seed-Daten, Log-Aufrufe</td><td class="nowrap"><a href="https://github.com/ShadowManuel/SWAC_Project/issues?q=label%3Atickets">B1–B7</a></td></tr>
+      <tr><td><span class="who"><span class="dot" style="background:var(--c4)"></span>Dev C</span></td><td>Logging-Service und README</td><td>Log-API mit Redis, README-Gerüst, ER-Diagramm, Roadmap; sammelt die Abschnitte der anderen ein</td><td class="nowrap"><a href="https://github.com/ShadowManuel/SWAC_Project/issues?q=label%3Alogging">C1–C8</a></td></tr>
+      <tr><td><span class="who"><span class="dot" style="background:var(--c5)"></span>Dev D</span></td><td>Frontend und SAST</td><td>Frontend mit LLM, Semgrep-Läufe, Auswertung der Ergebnisse für die README</td><td class="nowrap"><a href="https://github.com/ShadowManuel/SWAC_Project/issues?q=label%3Afrontend+OR+label%3Asast">D1–D8</a></td></tr>
     </tbody>
   </table></div>
-  <p>Jede Person legt ihr eigenes Projekt in der Solution an, schreibt das Dockerfile und trägt ihre Container in die Compose-Datei ein. Außerdem schreibt jede Person den README-Abschnitt zu ihrem Teil. Die einzelnen Tasks stehen als Issues im GitHub-Board.</p>
+  <p>Jede Person legt ihr eigenes Projekt in <code>src/</code> an, schreibt das Dockerfile und trägt ihre Container in die Compose-Datei ein. Als Vorlage dient das Unterrichtsbeispiel <code>src/simsapi</code>. Außerdem schreibt jede Person den README-Abschnitt zu ihrem Teil.</p>
 </section>
 
 <section>
