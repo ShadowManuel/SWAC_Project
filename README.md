@@ -31,5 +31,4 @@ Stoppen mit `docker compose down`. Mit `docker compose down -v` werden zusätzli
 |---|---|
 | `src/` | Die Services und das Frontend |
 | `src/simsapi` | Beispiel aus dem Unterricht, nur als Anhaltspunkt; wird nicht deployt |
-| `TASKS.md` | Aufgaben, Arbeitsregeln und Vorlagen für das Team |
 | `sims-projektplan.html` | Projektplan: Architektur, Schnittstellen, Datenmodell (im Browser öffnen) |

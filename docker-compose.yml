@@ -1,6 +1,6 @@
 # SIMS: alle Container für die lokale Entwicklung.
 # Jeder Service trägt seine Container in seinem Setup-Task selbst ein (A1, B1, C1, D2).
-# Vorlage für einen Service-Eintrag: siehe TASKS.md, Abschnitt "Vorlagen".
+# Vorlage für einen Service-Eintrag: der Service "simsapi" unten.
 #
 # Netze:
 #   app        Frontend und die drei APIs
