@@ -114,8 +114,8 @@ a { color: var(--accent); }
   <h2>Umfang</h2>
   <div class="box">
     <ul class="list">
-      <li><b>Auth:</b> Login prüft Benutzername und Passwort-Hash und gibt Id, Name und Rolle zurück. User anlegen, deaktivieren, auflisten.</li>
-      <li><b>Tickets:</b> Incident anlegen, bearbeiten, schließen, auflisten. Eskalation erhöht das Feld <code>EscalationLevel</code> um eins.</li>
+      <li><b>Auth:</b> Login prüft Benutzername und Passwort-Hash und gibt <code>id</code>, <code>username</code> und <code>role</code> zurück. User anlegen, deaktivieren, auflisten.</li>
+      <li><b>Tickets:</b> Incident anlegen, bearbeiten, schließen, auflisten. Eskalation erhöht <code>escalationLevel</code> um eins.</li>
       <li><b>Logging:</b> Die anderen Services schreiben Log-Einträge, die Liste ist im Frontend sichtbar.</li>
       <li><b>Frontend:</b> Login, Incident-Liste und -Formular, User-Liste, Log-Liste.</li>
       <li><b>Docker:</b> alles startet mit <code>docker compose up</code>.</li>
@@ -271,7 +271,7 @@ a { color: var(--accent); }
 <section>
   <h2>Schnittstellen</h2>
   <p>Die Schnittstellen hier sind unser gemeinsamer Bauplan. Haltet euch beim Programmieren genau an die Feldnamen, Werte und Statuscodes, dann passen Frontend und APIs am Ende zusammen, auch wenn alle gleichzeitig daran arbeiten. Sobald ein Service läuft, seht ihr seine Endpoints auch unter <code>/scalar</code> und könnt sie dort direkt ausprobieren. Wenn ihr an einer Schnittstelle etwas ändern müsst, sagt es vorher in der Gruppe, weil das Frontend davon abhängt.</p>
-  <p>Es gibt keine Token. Soweit ich weiß, hat der Lehrer gesagt, dass wir keine brauchen. Falls das jemand anders verstanden hat, korrigiert mich gern. Das Frontend merkt sich nach dem Login Id, Name und Rolle und blendet Admin-Funktionen für normale User aus. Wer die API direkt aufruft, kommt trotzdem an alles heran. Das kommt als bekannte Einschränkung in den Security-Abschnitt der README.</p>
+  <p>Es gibt keine Token. Soweit ich weiß, hat der Lehrer gesagt, dass wir keine brauchen. Falls das jemand anders verstanden hat, korrigiert mich gern. Das Frontend merkt sich nach dem Login <code>id</code>, <code>username</code> und <code>role</code> und blendet Admin-Funktionen für normale User aus. Wer die API direkt aufruft, kommt trotzdem an alles heran. Das kommt als bekannte Einschränkung in den Security-Abschnitt der README.</p>
 
   <div class="two">
     <div class="box">
@@ -354,7 +354,7 @@ Response 200
 Response 201
 { "id": 2, "username": "mmuster", "role": "User",
   "isActive": true, "createdAt": "2026-11-02T09:00:00Z" }</pre>
-        <p class="codes"><code>400</code> Feld leer, Passwort kürzer als 8 Zeichen, Rolle ungültig · <code>409</code> Username vergeben</p>
+        <p class="codes"><code>400</code> Feld leer, Passwort kürzer als 8 Zeichen, <code>role</code> ungültig · <code>409</code> Username vergeben</p>
       </div>
       <div class="box">
         <div class="ep-head"><span class="method">PATCH</span>/api/users/{id}/disable <span class="tag">Admin</span></div>
@@ -403,7 +403,7 @@ Incident</pre>
       </div>
       <div class="box">
         <div class="ep-head"><span class="method">POST</span>/api/incidents</div>
-        <p class="small">Melder ist der angemeldete User. Status startet mit <code>Open</code>, Eskalationsstufe mit 1.</p>
+        <p class="small"><code>reporterId</code> und <code>reporterName</code> sind der angemeldete User. <code>status</code> startet mit <code>Open</code>, <code>escalationLevel</code> mit 1.</p>
 <pre class="code">Request
 {
   "title": "Verdächtige Logins am VPN-Gateway",
@@ -419,7 +419,7 @@ Incident</pre>
 
 Response 201
 Incident</pre>
-        <p class="codes"><code>400</code> Titel, Beschreibung, Schweregrad oder System fehlt; CVE nicht im Format <code>CVE-JJJJ-NNNN</code></p>
+        <p class="codes"><code>400</code> <code>title</code>, <code>description</code>, <code>severity</code> oder <code>affectedSystem</code> fehlt; CVE nicht im Format <code>CVE-JJJJ-NNNN</code></p>
       </div>
       <div class="box">
         <div class="ep-head"><span class="method">PUT</span>/api/incidents/{id}</div>
@@ -442,11 +442,11 @@ Incident</pre>
       </div>
       <div class="box">
         <div class="ep-head"><span class="method">POST</span>/api/incidents/{id}/escalate</div>
-        <p class="small">Erhöht die Eskalationsstufe um eins.</p>
+        <p class="small">Erhöht <code>escalationLevel</code> um eins.</p>
 <pre class="code">Request   kein Body
 Response 200
 Incident (escalationLevel + 1)</pre>
-        <p class="codes"><code>404</code> · <code>409</code> Incident ist geschlossen oder schon auf Stufe 3</p>
+        <p class="codes"><code>404</code> · <code>409</code> Incident ist geschlossen oder <code>escalationLevel</code> ist schon 3</p>
       </div>
       <div class="box">
         <div class="ep-head"><span class="method">POST</span>/api/incidents/{id}/close</div>
@@ -470,7 +470,7 @@ Incident</pre>
   "message": "Incident 12 eskaliert auf Stufe 2" }
 
 Response  201, kein Body</pre>
-        <p class="codes"><code>400</code> Feld leer oder Level ungültig</p>
+        <p class="codes"><code>400</code> Feld leer oder <code>level</code> ungültig</p>
       </div>
       <div class="box">
         <div class="ep-head"><span class="method">GET</span>/api/logs?limit=100</div>
@@ -524,9 +524,9 @@ Response  201, kein Body</pre>
     </div>
   </div>
   <div class="box">
-    <h3>Melder und Bearbeiter</h3>
-    <p>Melder und Bearbeiter sind User aus der Auth-Datenbank. Weil die in einem anderen Container liegt, kann die Ticket-Datenbank keinen Foreign Key auf sie setzen. <code>ReporterId</code> und <code>AssigneeId</code> sind deshalb normale Zahlen, die die Datenbank nicht prüft.</p>
-    <p>Damit die Incident-Liste Namen anzeigen kann, ohne für jede Zeile den Auth-Service zu fragen, speichert der Ticket-Service den Namen als Kopie mit. Das Frontend schickt beides mit: beim Anlegen Id und Name des angemeldeten Users als Melder, beim Zuweisen Id und Name aus der User-Liste als Bearbeiter.</p>
+    <h3>Reporter und Assignee</h3>
+    <p><code>ReporterId</code> und <code>AssigneeId</code> verweisen auf User aus der Auth-Datenbank. Weil die in einem anderen Container liegt, kann die Ticket-Datenbank keinen Foreign Key auf sie setzen. Sie sind deshalb normale Zahlen, die die Datenbank nicht prüft.</p>
+    <p>Damit die Incident-Liste Namen anzeigen kann, ohne für jede Zeile den Auth-Service zu fragen, speichert der Ticket-Service den Namen als Kopie in <code>ReporterName</code> und <code>AssigneeName</code> mit. Das Frontend schickt beides mit: beim Anlegen <code>reporterId</code> und <code>reporterName</code> des angemeldeten Users, beim Zuweisen <code>assigneeId</code> und <code>assigneeName</code> aus der User-Liste.</p>
     <p class="small">Diese Entscheidung kommt ins ER-Diagramm und in die README. Die automatische Erfassung durch Geräte kommt in die Roadmap.</p>
   </div>
 </section>
