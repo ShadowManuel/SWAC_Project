@@ -527,7 +527,7 @@ Response  201, kein Body</pre>
     <h3>Reporter und Assignee</h3>
     <p><code>ReporterId</code> und <code>AssigneeId</code> verweisen auf User aus der Auth-Datenbank. Weil die in einem anderen Container liegt, kann die Ticket-Datenbank keinen Foreign Key auf sie setzen. Sie sind deshalb normale Zahlen, die die Datenbank nicht prüft.</p>
     <p>Damit die Incident-Liste Namen anzeigen kann, ohne für jede Zeile den Auth-Service zu fragen, speichert der Ticket-Service den Namen als Kopie in <code>ReporterName</code> und <code>AssigneeName</code> mit. Das Frontend schickt beides mit: beim Anlegen <code>reporterId</code> und <code>reporterName</code> des angemeldeten Users, beim Zuweisen <code>assigneeId</code> und <code>assigneeName</code> aus der User-Liste.</p>
-    <p class="small">Diese Entscheidung kommt ins ER-Diagramm und in die README. Die automatische Erfassung durch Geräte kommt in die Roadmap.</p>
+    <p class="small">Diese Entscheidung kommt ins ER-Diagramm und in die README.</p>
   </div>
 </section>
 
