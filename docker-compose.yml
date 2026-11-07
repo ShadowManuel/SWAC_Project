@@ -37,6 +37,8 @@ services:
 
   auth-db:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "127.0.0.1:14330:1433"
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "SimsUni2026!Test"

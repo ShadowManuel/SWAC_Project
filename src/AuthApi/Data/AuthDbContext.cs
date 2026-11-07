@@ -12,23 +12,19 @@ public class AuthDbContext : DbContext
     }
 
     public DbSet<User> Users => Set<User>();
-    public DbSet<Role> Roles => Set<Role>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<User>()
-            .HasOne(u => u.Role)
-            .WithMany(r => r.Users)
-            .HasForeignKey(u => u.RoleId);
-
-        modelBuilder.Entity<User>()
             .HasIndex(u => u.Username)
             .IsUnique();
 
+        // Rolle als lesbarer Text ("Admin"/"User") in SQL statt als Zahl.
         modelBuilder.Entity<User>()
-            .HasIndex(u => u.Email)
-            .IsUnique();
+            .Property(u => u.Role)
+            .HasConversion<string>()
+            .HasMaxLength(20);
     }
 }
