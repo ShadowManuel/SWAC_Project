@@ -20,6 +20,31 @@ services:
       ASPNETCORE_ENVIRONMENT: Development   # Scalar ist im Beispiel nur in Development aktiv
     networks: [app]
 
+  auth-api:
+    build:
+      context: .
+      dockerfile: src/AuthApi/Dockerfile
+    ports:
+      - "5001:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__AuthDb: "Server=auth-db,1433;Database=SIMS_Auth;User Id=sa;Password=SimsUni2026!Test;Encrypt=True;TrustServerCertificate=True"
+    depends_on:
+      - auth-db
+    networks:
+      - app
+      - auth-db
+
+  auth-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "SimsUni2026!Test"
+    volumes:
+      - auth-db-data:/var/opt/mssql
+    networks:
+      - auth-db
+
 networks:
   app:
   auth-db:
