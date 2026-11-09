@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="src/simsapi/simsapi.csproj" />
+  <Project Path="src/ticketapi/ticketapi.csproj" Id="8c60e065-c614-4c97-a56f-1b70b0a781aa" />
 </Solution>
