@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="logging-service/logging-service.csproj" />
   <Project Path="src/simsapi/simsapi.csproj" />
 </Solution>
