@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="logging-service/logging-service.csproj" />
+  <Project Path="src/logging-service/logging-service.csproj." />
   <Project Path="src/AuthApi/AuthApi.csproj" Id="58e2c761-bb94-4203-aa95-ea0ff43c044e" />
   <Project Path="src/simsapi/simsapi.csproj" />
 </Solution>

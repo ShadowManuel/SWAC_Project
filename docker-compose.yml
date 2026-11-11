@@ -47,6 +47,35 @@ services:
     networks:
       - auth-db
 
+  logging-api:
+    build:
+      context: .
+      dockerfile: src/logging-service/Dockerfile
+    ports:
+      - "5003:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__LogDb: "mongodb://sims:${LOG_DB_PASSWORD:-ChangeMe_Log1}@log-db:27017/?authSource=admin"
+    depends_on:
+      - log-db
+    networks:
+      - app
+      - log-db
+
+  log-db:
+    image: mongo:7
+    ports:
+      - "127.0.0.1:27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: sims
+      MONGO_INITDB_ROOT_PASSWORD: ${LOG_DB_PASSWORD:-ChangeMe_Log1}
+    volumes:
+      - log-db-data:/data/db
+    networks:
+      - log-db
+
+
+
 networks:
   app:
   auth-db:
@@ -57,3 +86,4 @@ volumes:
   auth-db-data:
   ticket-db-data:
   redis-data:
+  log-db-data:
