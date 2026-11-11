@@ -1,4 +1,7 @@
 
+using Microsoft.EntityFrameworkCore;
+using ticketapi.Daten;
+
 namespace ticketapi
 {
     public class Program
@@ -12,6 +15,9 @@ namespace ticketapi
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+
+            builder.Services.AddDbContext<TicketDatenbank>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("TicketDb")));
 
             var app = builder.Build();
 
