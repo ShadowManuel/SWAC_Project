@@ -97,6 +97,14 @@ services:
     depends_on: [ticket-db]
     restart: on-failure
 
+  web:
+    build:
+      context: ./src/web
+    ports:
+      - "8080:80"
+    networks:
+      - app
+
 networks:
   app:
   auth-db:

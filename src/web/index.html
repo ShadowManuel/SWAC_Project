@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIMS Testseite</title>
+<style>
+  :root { --accent:#2F4BC0; --line:#D0D5E2; --muted:#4B5563; --bg:#F1F3F9; --ink:#1F2937; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink); background:var(--bg); }
+  header { background:#fff; border-bottom:1px solid var(--line); padding:16px 24px; display:flex; flex-direction:column; gap:12px; }
+  h1 { margin:0; font-size:20px; }
+  h2 { margin:0 0 12px; font-size:16px; }
+  h3 { margin:6px 0 10px; font-size:14px; }
+  main { padding:24px; display:flex; flex-direction:column; gap:28px; max-width:1500px; margin:0 auto; }
+  .row { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; }
+  .f { display:flex; flex-direction:column; gap:3px; margin-bottom:8px; flex:1 1 140px; min-width:0; }
+  label { font-size:12px; font-weight:600; color:var(--muted); }
+  input, select { min-height:36px; border:1px solid #8A93AB; border-radius:6px; padding:0 10px; font:inherit; background:#fff; color:var(--ink); width:100%; }
+  button { min-height:40px; padding:0 16px; border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:6px; font:600 14px system-ui,sans-serif; cursor:pointer; }
+  button.alt { background:#fff; color:var(--accent); }
+  button:disabled { opacity:.55; cursor:wait; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:16px; align-items:start; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:8px; padding:16px; }
+  .head { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .head code { font-size:13px; word-break:break-all; }
+  .m { font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; }
+  .m-GET { background:#DBE4FF; color:#1E3A8A; }
+  .m-POST { background:#D5F0E8; color:#0B4F3F; }
+  .m-PUT, .m-PATCH { background:#FFE8CC; color:#7A3500; }
+  .out { margin-top:12px; font-size:13px; }
+  .out pre { margin:8px 0 0; max-height:260px; overflow:auto; background:#F6F7FB; border:1px solid var(--line); border-radius:6px; padding:10px; font:12px/1.5 ui-monospace,Menlo,Consolas,monospace; white-space:pre-wrap; word-break:break-word; }
+  .tag { display:inline-block; font-weight:700; padding:2px 8px; border-radius:999px; font-size:12px; }
+  .t-ok { background:#D5F0E8; color:#0B4F3F; }
+  .t-expected { background:#DBE4FF; color:#1E3A8A; }
+  .t-bad { background:#FDE8E8; color:#7F1D1D; }
+  .t-net { background:#374151; color:#fff; }
+  .problems { margin:6px 0 0; padding-left:18px; color:#7F1D1D; }
+  .notes { margin:6px 0 0; padding-left:18px; color:var(--muted); }
+  .hint { color:var(--muted); font-size:12px; }
+  #demo { background:#fff; border:1px solid var(--line); border-radius:8px; padding:16px; }
+  #demo ol { margin:8px 0 0; padding-left:20px; }
+  #demo li { margin-bottom:6px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>SIMS Testseite: Verbindungen der Services prüfen</h1>
+  <div class="row">
+    <div class="f"><label for="base-auth">auth-api</label><input id="base-auth"></div>
+    <div class="f"><label for="base-tickets">ticketapi</label><input id="base-tickets"></div>
+    <div class="f"><label for="base-logs">logging-api</label><input id="base-logs"></div>
+  </div>
+  <div class="row">
+    <button id="btn-health" type="button">Alle Services prüfen</button>
+    <button id="btn-proxy" type="button" class="alt">Adressen: über nginx (Standard)</button>
+    <button id="btn-direct" type="button" class="alt">Adressen: direkt über Ports 5001 bis 5003</button>
+  </div>
+  <div class="row" style="align-items:center">
+    <span id="health" class="hint">Noch nicht geprüft.</span>
+    <span id="session" class="hint">Nicht angemeldet.</span>
+  </div>
+  <div class="hint">Standard: Die Seite ruft die APIs über den nginx-Container auf (gleiche Adresse, kein CORS nötig). "Direkt" ruft die Ports im Browser auf und braucht CORS in jeder API. Jeder Button ruft genau einen Endpoint des echten Backends auf und prüft die Antwort (Feldnamen, Statuscodes, erlaubte Werte).</div>
+</header>
+<main>
+  <section id="demo">
+    <h2>Demo-Durchlauf</h2>
+    <div class="hint">Spielt den kompletten Ablauf durch und prüft dabei auch die Verbindungen zwischen den Services (ticketapi und auth-api schreiben ins Logging): User anlegen, anmelden, Ticket anlegen, übernehmen, eskalieren, erledigen, Logs prüfen. Legt dabei einen Test-User und ein Test-Ticket an.</div>
+    <div class="row" style="margin-top:10px"><button id="btn-demo" type="button">Demo-Durchlauf starten</button></div>
+    <ol id="demo-out"></ol>
+  </section>
+  <div id="app"></div>
+</main>
+<noscript>Diese Seite braucht JavaScript.</noscript>
+<script>
+// ---------- Konfiguration: das echte Backend (Stand main) ----------
+const PROXY = { auth: '/auth-api', tickets: '/ticket-api', logs: '/logging-api' };
+const DIRECT = { auth: 'http://localhost:5001', tickets: 'http://localhost:5002', logs: 'http://localhost:5003' };
+const SERVICES = [
+  { key: 'auth',    title: 'auth-api' },
+  { key: 'tickets', title: 'ticketapi' },
+  { key: 'logs',    title: 'logging-api' },
+];
+const KATEGORIE = ['Phishing', 'Logging', 'Malware', 'Connecting', 'Other'];
+const STATUS = ['Offen', 'InBearbeitung', 'Erledigt'];
+const USER_KEYS = ['id', 'username', 'role', 'supportLevel'];
+const USERLIST_KEYS = [...USER_KEYS, 'isActive'];
+const TICKET_KEYS = ['id', 'titel', 'beschreibung', 'ersteller', 'bearbeiter', 'kategorie', 'status', 'level', 'erstelltAm'];
+const LOG_KEYS = ['id', 'timestamp', 'level', 'service', 'message'];
+const TICKET_ENUMS = { kategorie: KATEGORIE, status: STATUS };
+const ROLE_ENUM = { role: ['User', 'Admin'] };
+
+// ok = Erfolgsstatus, errs = Fehlerstatus, die der Code bewusst liefert.
+// loc: path | query | body. nullable: leeres Feld wird als null gesendet.
+const ENDPOINTS = [
+  { id: 'login', svc: 'auth', method: 'POST', path: '/api/auth/login', title: 'Login',
+    ok: [200], errs: [400, 401], shape: 'obj', keys: USER_KEYS, enums: ROLE_ENUM,
+    fields: [
+      { n: 'username', l: 'Benutzername', v: 'demo', loc: 'body' },
+      { n: 'password', l: 'Passwort', v: 'Sicher123!', t: 'password', loc: 'body' } ],
+    onOk: (d) => setSession(d) },
+  { id: 'users-list', svc: 'auth', method: 'GET', path: '/api/users', title: 'User auflisten',
+    ok: [200], errs: [], shape: 'array', keys: USERLIST_KEYS, enums: ROLE_ENUM, fields: [] },
+  { id: 'users-create', svc: 'auth', method: 'POST', path: '/api/users', title: 'User anlegen',
+    ok: [201], errs: [400, 409], shape: 'obj', keys: USER_KEYS, enums: ROLE_ENUM,
+    fields: [
+      { n: 'username', l: 'Benutzername (3 bis 50 Zeichen)', v: 'demo', loc: 'body' },
+      { n: 'password', l: 'Passwort (mindestens 8 Zeichen)', v: 'Sicher123!', t: 'password', loc: 'body' } ] },
+
+  { id: 'ticket-list', svc: 'tickets', method: 'GET', path: '/api/ticket', title: 'Offene Tickets auflisten (nur Status Offen)',
+    ok: [200], errs: [], shape: 'array', keys: TICKET_KEYS, enums: TICKET_ENUMS,
+    fields: [ { n: 'level', l: 'level (optional, 1 bis 3)', v: '', t: 'number', loc: 'query' } ] },
+  { id: 'ticket-create', svc: 'tickets', method: 'POST', path: '/api/ticket', title: 'Ticket anlegen',
+    ok: [200, 201], errs: [400], shape: 'obj', keys: TICKET_KEYS, enums: TICKET_ENUMS,
+    fields: [
+      { n: 'titel', l: 'Titel', v: 'Verdächtige Logins am VPN-Gateway', loc: 'body' },
+      { n: 'beschreibung', l: 'Beschreibung', v: 'Viele fehlgeschlagene Logins in kurzer Zeit.', loc: 'body' },
+      { n: 'kategorie', l: 'Kategorie (Phishing und Malware starten auf Level 2)', v: 'Logging', t: 'select', o: KATEGORIE, loc: 'body' },
+      { n: 'ersteller', l: 'Ersteller (nach Login automatisch)', v: 'demo', loc: 'body' } ],
+    onOk: (d) => setTicketId(d.id) },
+  { id: 'ticket-take', svc: 'tickets', method: 'POST', path: '/api/ticket/{id}/uebernehmen', title: 'Ticket übernehmen',
+    ok: [200], errs: [400, 404, 409], shape: 'obj', keys: TICKET_KEYS, enums: TICKET_ENUMS,
+    fields: [
+      { n: 'id', l: 'Ticket-Id', v: '1', t: 'number', loc: 'path' },
+      { n: 'bearbeiter', l: 'Bearbeiter (nach Login automatisch)', v: 'demo', loc: 'body' } ] },
+  { id: 'ticket-escalate', svc: 'tickets', method: 'POST', path: '/api/ticket/{id}/eskalieren', title: 'Ticket eskalieren',
+    ok: [200], errs: [404, 409], shape: 'obj', keys: TICKET_KEYS, enums: TICKET_ENUMS,
+    fields: [ { n: 'id', l: 'Ticket-Id', v: '1', t: 'number', loc: 'path' } ] },
+  { id: 'ticket-done', svc: 'tickets', method: 'POST', path: '/api/ticket/{id}/erledigen', title: 'Ticket erledigen',
+    ok: [200], errs: [404, 409], shape: 'obj', keys: TICKET_KEYS, enums: TICKET_ENUMS,
+    fields: [ { n: 'id', l: 'Ticket-Id', v: '1', t: 'number', loc: 'path' } ] },
+  { id: 'ticket-mine', svc: 'tickets', method: 'GET', path: '/api/ticket/meine', title: 'Meine Tickets (in Bearbeitung)',
+    ok: [200], errs: [], shape: 'array', keys: TICKET_KEYS, enums: TICKET_ENUMS,
+    fields: [ { n: 'bearbeiter', l: 'Bearbeiter', v: 'demo', loc: 'query' } ] },
+
+  { id: 'log-write', svc: 'logs', method: 'POST', path: '/api/logs', title: 'Log-Eintrag schreiben',
+    ok: [201], errs: [400], shape: 'none',
+    fields: [
+      { n: 'level', l: 'Level', v: 'Info', t: 'select', o: ['Info', 'Warning', 'Error'], loc: 'body' },
+      { n: 'service', l: 'Service', v: 'Testseite', loc: 'body' },
+      { n: 'message', l: 'Nachricht', v: 'Test-Eintrag von der Testseite', loc: 'body' } ] },
+  { id: 'log-read', svc: 'logs', method: 'GET', path: '/api/logs', title: 'Logs lesen',
+    ok: [200], errs: [], shape: 'array', keys: LOG_KEYS, enums: { level: ['Info', 'Warning', 'Error'] },
+    fields: [ { n: 'limit', l: 'limit (optional, 1 bis 1000, Standard 100)', v: '20', t: 'number', loc: 'query' } ] },
+];
+const byId = (id) => ENDPOINTS.find((e) => e.id === id);
+
+// ---------- Hilfsfunktionen ----------
+function h(tag, attrs = {}, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') el.className = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat()) el.append(kid);
+  return el;
+}
+const $ = (id) => document.getElementById(id);
+const baseUrl = (svc) => $('base-' + svc).value.trim().replace(/\/+$/, '');
+function setBases(map) { for (const s of SERVICES) $('base-' + s.key).value = map[s.key]; }
+
+function setField(id, value) { const el = $(id); if (el) el.value = value; }
+function setSession(user) {
+  $('session').textContent = 'Angemeldet als ' + user.username + ' (Id ' + user.id + ', Rolle ' + user.role + ', Support-Level ' + user.supportLevel + ')';
+  setField('ticket-create-ersteller', user.username);
+  setField('ticket-take-bearbeiter', user.username);
+  setField('ticket-mine-bearbeiter', user.username);
+}
+function setTicketId(id) {
+  for (const c of ['ticket-take', 'ticket-escalate', 'ticket-done']) setField(c + '-id', id);
+}
+
+// ---------- Request bauen und senden ----------
+function defaultsOf(def, overrides = {}) {
+  const v = {};
+  for (const f of def.fields) v[f.n] = String(f.v ?? '');
+  return { ...v, ...overrides };
+}
+function valuesFromDom(def) {
+  const v = {};
+  for (const f of def.fields) {
+    const raw = $(def.id + '-' + f.n).value;
+    v[f.n] = f.t === 'password' ? raw : raw.trim();
+  }
+  return v;
+}
+function buildRequest(def, values) {
+  let path = def.path;
+  const query = [];
+  const body = {};
+  let hasBody = false;
+  for (const f of def.fields) {
+    const raw = values[f.n] ?? '';
+    if (f.loc === 'path') { path = path.replace('{' + f.n + '}', encodeURIComponent(raw)); continue; }
+    if (f.loc === 'query') { if (raw !== '') query.push(f.n + '=' + encodeURIComponent(raw)); continue; }
+    hasBody = true;
+    body[f.n] = (raw === '' && f.nullable) ? null : raw;
+  }
+  return { path, query: query.join('&'), body: hasBody ? body : null };
+}
+
+const ISO = /^\d{4}-\d{2}-\d{2}T[\d:.]+Z?$/;
+function checkItem(def, item, where, notes) {
+  const p = [];
+  if (typeof item !== 'object' || item === null) return [where + ' ist kein Objekt'];
+  for (const k of def.keys) if (!(k in item)) p.push(where + ': Feld "' + k + '" fehlt');
+  for (const [k, allowed] of Object.entries(def.enums || {})) {
+    if (k in item && !allowed.includes(item[k])) p.push(where + ': ' + k + '="' + item[k] + '" ist nicht erlaubt (' + allowed.join(' | ') + ')');
+  }
+  for (const k of ['erstelltAm', 'timestamp']) {
+    if (typeof item[k] === 'string') {
+      if (!ISO.test(item[k])) p.push(where + ': ' + k + ' ist kein ISO-8601-Zeitstempel');
+      else if (!item[k].endsWith('Z')) notes.push(k + ' hat keine Zeitzone (kein Z am Ende). Der Browser liest das dann als lokale Zeit.');
+    }
+  }
+  return p;
+}
+function evaluate(def, status, data) {
+  const notes = [];
+  if (def.ok.includes(status)) {
+    const problems = [];
+    if (def.shape === 'obj') problems.push(...checkItem(def, data, 'Antwort', notes));
+    if (def.shape === 'array') {
+      if (!Array.isArray(data)) problems.push('Antwort sollte ein Array sein');
+      else if (data.length) problems.push(...checkItem(def, data[0], 'Eintrag 1', notes));
+    }
+    return { state: problems.length ? 'bad' : 'ok', problems, notes: [...new Set(notes)] };
+  }
+  if (def.errs.includes(status)) return { state: 'expected', problems: [], notes };
+  const hint = status === 503 ? ' Der Service meldet 503: meist ist seine Datenbank nicht erreichbar.' : '';
+  return { state: 'bad', notes,
+    problems: ['Status ' + status + ' ist hier nicht vorgesehen (erlaubt: ' + [...def.ok, ...def.errs].join(', ') + ').' + hint] };
+}
+
+async function send(def, values) {
+  const { path, query, body } = buildRequest(def, values);
+  const url = baseUrl(def.svc) + path + (query ? '?' + query : '');
+  const opt = { method: def.method, headers: {} };
+  if (body) { opt.headers['Content-Type'] = 'application/json'; opt.body = JSON.stringify(body); }
+  const t0 = performance.now();
+  const ms = () => Math.round(performance.now() - t0);
+  let res;
+  try {
+    res = await fetch(url, opt);
+  } catch (e) {
+    return { state: 'net', url, ms: ms(), data: null, text: '', notes: [],
+      problems: ['Keine Verbindung zu ' + url + '. Läuft der Container? Bei "direkt": Ist CORS für ' + location.origin + ' freigegeben? (Mit der Standard-Einstellung über nginx braucht es kein CORS.)'] };
+  }
+  const text = await res.text();
+  if (res.status === 502 || res.status === 504) {
+    return { state: 'net', url, status: res.status, ms: ms(), data: null, text, notes: [],
+      problems: ['nginx erreicht den Service nicht (Status ' + res.status + '). Der Container läuft nicht, startet noch oder ist abgestürzt: docker compose ps und docker compose logs <service> prüfen.'] };
+  }
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch (e) { data = null; }
+  return { ...evaluate(def, res.status, data), url, status: res.status, ms: ms(), data, text };
+}
+
+// ---------- Anzeige ----------
+const LABEL = { ok: 'Vertrag erfüllt', expected: 'Fehlerfall wie vorgesehen', bad: 'Abweichung', net: 'Nicht erreichbar' };
+function show(out, r) {
+  out.replaceChildren();
+  out.append(h('span', { class: 'tag t-' + r.state }, LABEL[r.state]), ' ' + (r.status ? r.status + ' · ' : '') + r.ms + ' ms');
+  if (r.problems.length) out.append(h('ul', { class: 'problems' }, r.problems.map((p) => h('li', {}, p))));
+  if (r.notes && r.notes.length) out.append(h('ul', { class: 'notes' }, r.notes.map((p) => h('li', {}, 'Hinweis: ' + p))));
+  const shown = r.data !== null ? JSON.stringify(r.data, null, 2) : (r.text || '(kein Body)');
+  out.append(h('pre', {}, shown.length > 4000 ? shown.slice(0, 4000) + '\n... gekürzt' : shown));
+}
+function card(def) {
+  const out = h('div', { class: 'out', 'aria-live': 'polite' });
+  const fields = def.fields.map((f) => {
+    const id = def.id + '-' + f.n;
+    let input;
+    if (f.t === 'select') {
+      input = h('select', { id }, f.o.map((o) => h('option', { value: o }, o)));
+      input.value = f.v;
+    } else {
+      input = h('input', { id, type: f.t || 'text', value: f.v ?? '' });
+    }
+    return h('div', { class: 'f' }, h('label', { for: id }, f.l + (f.loc === 'path' ? ' (in der URL)' : '')), input);
+  });
+  const btn = h('button', { type: 'button' }, 'Senden');
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    const r = await send(def, valuesFromDom(def));
+    show(out, r);
+    if ((r.state === 'ok') && def.onOk && r.data) def.onOk(r.data);
+    btn.disabled = false;
+  });
+  return h('section', { class: 'card' },
+    h('div', { class: 'head' }, h('span', { class: 'm m-' + def.method }, def.method), h('code', {}, def.path)),
+    h('h3', {}, def.title), fields, btn, out);
+}
+function render() {
+  const app = $('app');
+  for (const s of SERVICES) {
+    app.append(h('h2', {}, s.title), h('div', { class: 'grid', style: 'margin-bottom:28px' },
+      ENDPOINTS.filter((e) => e.svc === s.key).map(card)));
+  }
+  setBases(PROXY);
+}
+
+// ---------- Erreichbarkeit ----------
+const PROBE = { auth: 'users-list', tickets: 'ticket-list', logs: 'log-read' };
+async function checkHealth() {
+  const box = $('health');
+  box.replaceChildren('Prüfe ...');
+  const parts = [];
+  for (const s of SERVICES) {
+    const def = byId(PROBE[s.key]);
+    const r = await send(def, defaultsOf(def, { limit: '1', level: '' }));
+    const up = r.state !== 'net';
+    const extra = up ? ' (' + r.status + (r.state === 'bad' ? ', Antwort weicht ab' : '') + ')' : '';
+    parts.push(h('span', {}, (up ? 'erreichbar: ' : 'NICHT erreichbar: ') + s.title + extra));
+    if (!up) parts.push(h('span', { class: 'hint' }, ' [' + r.problems[0] + ']'));
+  }
+  box.replaceChildren(...parts.flatMap((p, i) => (i && p.className !== 'hint' ? [' | ', p] : [p])));
+}
+
+// ---------- Demo-Durchlauf ----------
+async function runDemo() {
+  const list = $('demo-out');
+  list.replaceChildren();
+  const btn = $('btn-demo');
+  btn.disabled = true;
+  const stamp = Date.now().toString().slice(-6);
+  const user = 'demo' + stamp;
+  const pw = 'Sicher123!';
+  const ctx = {};
+  const has = (a, id) => Array.isArray(a) && a.some((t) => t.id === id);
+  const logHas = (logs, text) => Array.isArray(logs) && logs.some((l) => typeof l.message === 'string' && l.message.includes(text));
+  const steps = [
+    { t: 'User anlegen', id: 'users-create', v: () => ({ username: user, password: pw }),
+      ok: (d) => { ctx.user = d; setField('login-username', user); setField('login-password', pw); } },
+    { t: 'Gleichen User nochmal anlegen (409 erwartet)', id: 'users-create', v: () => ({ username: user, password: pw }), expect: 409, needs: 'user' },
+    { t: 'Login mit richtigem Passwort', id: 'login', v: () => ({ username: user, password: pw }), needs: 'user',
+      ok: (d) => { ctx.me = d; setSession(d); },
+      verify: (d) => (d.username === user ? [] : ['Antwort enthält einen anderen Benutzernamen']) },
+    { t: 'Login mit falschem Passwort (401 erwartet)', id: 'login', v: () => ({ username: user, password: 'falsch-falsch' }), expect: 401, needs: 'user' },
+    { t: 'Ticket anlegen (Kategorie Logging, Start-Level 1)', id: 'ticket-create',
+      v: () => ({ titel: 'Demo-Ticket ' + stamp, beschreibung: 'Automatisch angelegt vom Demo-Durchlauf', kategorie: 'Logging', ersteller: user }), needs: 'me',
+      ok: (d) => { ctx.ticket = d; setTicketId(d.id); },
+      verify: (d) => [...(d.status === 'Offen' ? [] : ['Neues Ticket sollte Status Offen haben']), ...(d.level === 1 ? [] : ['Kategorie Logging sollte auf Level 1 starten'])] },
+    { t: 'Ticket übernehmen', id: 'ticket-take', v: () => ({ id: String(ctx.ticket.id), bearbeiter: user }), needs: 'ticket',
+      verify: (d) => [...(d.status === 'InBearbeitung' ? [] : ['Status sollte InBearbeitung sein']), ...(d.bearbeiter === user ? [] : ['bearbeiter sollte gesetzt sein'])] },
+    { t: 'Meine Tickets enthalten das Ticket', id: 'ticket-mine', v: () => ({ bearbeiter: user }), needs: 'ticket',
+      verify: (d) => (has(d, ctx.ticket.id) ? [] : ['Das übernommene Ticket fehlt in "meine"']) },
+    { t: 'Ticket eskalieren (Level 1 auf 2, wieder Offen)', id: 'ticket-escalate', v: () => ({ id: String(ctx.ticket.id) }), needs: 'ticket',
+      verify: (d) => [...(d.level === 2 ? [] : ['Level sollte 2 sein']), ...(d.status === 'Offen' ? [] : ['Status sollte wieder Offen sein']), ...(d.bearbeiter === null ? [] : ['bearbeiter sollte leer sein'])] },
+    { t: 'Ticket erneut übernehmen', id: 'ticket-take', v: () => ({ id: String(ctx.ticket.id), bearbeiter: user }), needs: 'ticket' },
+    { t: 'Ticket erledigen', id: 'ticket-done', v: () => ({ id: String(ctx.ticket.id) }), needs: 'ticket',
+      verify: (d) => (d.status === 'Erledigt' ? [] : ['Status sollte Erledigt sein']) },
+    { t: 'Erledigtes Ticket ist nicht mehr in der Liste offener Tickets', id: 'ticket-list', v: () => ({ level: '' }), needs: 'ticket',
+      verify: (d) => (has(d, ctx.ticket.id) ? ['Erledigtes Ticket steht noch in der offenen Liste'] : []) },
+    { t: 'Verbindung ticketapi zu logging-api: Log "Ticket ... erstellt" vorhanden', id: 'log-read', v: () => ({ limit: '200' }), needs: 'ticket',
+      verify: (d) => (logHas(d, 'Ticket ' + ctx.ticket.id + ' erstellt') ? [] : ['Kein Log-Eintrag zu diesem Ticket. Erreicht die ticketapi die logging-api (http://logging-api:8080)? docker compose logs ticketapi prüfen.']) },
+    { t: 'Verbindung auth-api zu logging-api: Log "Login erfolgreich" vorhanden', id: 'log-read', v: () => ({ limit: '200' }), needs: 'me',
+      verify: (d) => (logHas(d, 'UserId=' + ctx.me.id) ? [] : ['Kein Log-Eintrag zum Login. Erreicht die auth-api die logging-api (LoggingService__BaseUrl in docker-compose.yml)? docker compose logs auth-api prüfen.']) },
+  ];
+  for (const s of steps) {
+    const li = h('li', {}, s.t + ': ');
+    list.append(li);
+    if (s.needs && !ctx[s.needs]) {
+      li.append(h('span', { class: 'tag t-net' }, 'übersprungen (ein früherer Schritt ist fehlgeschlagen)'));
+      continue;
+    }
+    const def = byId(s.id);
+    const r = await send(def, defaultsOf(def, s.v()));
+    let good, problems = r.problems.slice();
+    if (s.expect) {
+      good = r.status === s.expect;
+      if (!good && r.state !== 'net') problems = ['Erwartet war Status ' + s.expect + ', geliefert wurde ' + r.status];
+    } else {
+      good = r.state === 'ok';
+      if (good && s.verify) { const extra = s.verify(r.data); if (extra.length) { good = false; problems = extra; } }
+    }
+    if (good && s.ok && r.data) s.ok(r.data);
+    li.append(h('span', { class: 'tag t-' + (good ? 'ok' : (r.state === 'net' ? 'net' : 'bad')) }, good ? 'OK' : (r.state === 'net' ? 'nicht erreichbar' : 'Fehler')),
+      ' ' + (r.status ?? '') + ' · ' + r.ms + ' ms');
+    if (!good) {
+      const msg = problems.length ? problems : [r.text || ('Status ' + r.status)];
+      li.append(h('ul', { class: 'problems' }, msg.map((p) => h('li', {}, p))));
+    }
+  }
+  btn.disabled = false;
+}
+
+render();
+$('btn-health').addEventListener('click', checkHealth);
+$('btn-proxy').addEventListener('click', () => setBases(PROXY));
+$('btn-direct').addEventListener('click', () => setBases(DIRECT));
+$('btn-demo').addEventListener('click', runDemo);
+</script>
+</body>
+</html>
