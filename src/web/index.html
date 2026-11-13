@@ -254,7 +254,7 @@ const NAV = [
 ];
 function enterApp(view) {
   $('login').classList.add('hidden'); $('shell').classList.remove('hidden');
-  $('who-text').innerHTML = 'Angemeldet als <b>' + esc(state.me.username) + '</b>' + (state.me.role === 'Admin' ? '' : ' <span class="muted">(' + esc(state.me.role) + ')</span>');
+  $('who-text').innerHTML = 'Angemeldet als <b>' + esc(state.me.username) + '</b>' + '<div class="muted">' + esc(state.me.role) + ' · Support-Level ' + esc(state.me.supportLevel) + '</div>';
   $('nav').innerHTML = NAV.map((n) => '<button type="button" data-view="' + n.id + '">' + esc(n.label) + (n.admin ? '<span class="pill">Admin</span>' : '') + '</button>').join('');
   go(view);
 }
