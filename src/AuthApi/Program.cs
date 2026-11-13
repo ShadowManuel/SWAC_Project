@@ -48,9 +48,41 @@ if (app.Environment.IsDevelopment())
 
     db.Database.Migrate();
 
+    var hasher = scope.ServiceProvider
+    .GetRequiredService<IPasswordHasher<User>>();
+
+    var testUsers = new[]
+    {
+    ("testuser1", 1, builder.Configuration["SeedUsers:TestUser1Password"]),
+    ("testuser2", 2, builder.Configuration["SeedUsers:TestUser2Password"]),
+    ("testuser3", 3, builder.Configuration["SeedUsers:TestUser3Password"])
+};
+
+    foreach (var (username, level, password) in testUsers)
+    {
+        if (string.IsNullOrWhiteSpace(password))
+            continue;
+
+        if (await db.Users.AnyAsync(u => u.Username == username))
+            continue;
+
+        var user = new User
+        {
+            Username = username,
+            Role = UserRole.User,
+            SupportLevel = level,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        user.PasswordHash = hasher.HashPassword(user, password);
+
+        db.Users.Add(user);
+    }
+
+    await db.SaveChangesAsync();
 
 
-   
 }
 
 app.Run();
