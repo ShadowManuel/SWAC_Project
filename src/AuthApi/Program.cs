@@ -16,7 +16,6 @@ builder.Services.AddHttpClient<LogClient>(client =>
         ?? "http://localhost:5003";
 
     client.BaseAddress = new Uri(url.TrimEnd('/') + "/");
-    client.Timeout = TimeSpan.FromSeconds(2);
 });
 builder.Services.AddOpenApi();
 
