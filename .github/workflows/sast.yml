@@ -1,0 +1,35 @@
+# Führt bei jedem Push und Pull Request automatisch Semgrep aus.
+# Ergebnis: im Actions-Tab beim jeweiligen Lauf unter "Artifacts" -> semgrep-ergebnis
+name: SAST (Semgrep)
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Semgrep ausführen
+        run: |
+          mkdir -p sast
+          semgrep scan --config auto --exclude docs \
+            --text --output sast/semgrep-ergebnis.txt \
+            --json-output=sast/semgrep-ergebnis.json \
+            --sarif-output=sast/semgrep-ergebnis.sarif
+          cat sast/semgrep-ergebnis.txt
+
+      - name: Ergebnis hochladen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-ergebnis
+          path: sast/

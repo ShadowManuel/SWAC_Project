@@ -1,0 +1,33 @@
+                   
+                   
+┌─────────────────┐
+│ 5 Code Findings │
+└─────────────────┘
+                              
+    .github/workflows/sast.yml
+    ❯❱ yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag
+          ❰❰ Blocking ❱❱
+          GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently   
+          repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-
+          github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: 
+          actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.                                         
+          Details: https://sg.run/2LgAL                                                                       
+                                                                                                              
+           19┆ - uses: actions/checkout@v4
+            ⋮┆----------------------------------------
+           32┆ uses: actions/upload-artifact@v4
+                      
+    src/web/nginx.conf
+    ❯❱ generic.nginx.security.missing-internal.missing-internal
+          ❰❰ Blocking ❱❱
+          This location block contains a 'proxy_pass' directive but does not contain the 'internal' directive.
+          The 'internal' directive restricts access to this location to internal requests. Without 'internal',
+          an attacker could use your server for server-side request forgeries (SSRF). Include the 'internal'  
+          directive in this block to limit exposure.                                                          
+          Details: https://sg.run/Q5px                                                                        
+                                                                                                              
+           29┆ proxy_pass $upstream;
+            ⋮┆----------------------------------------
+           35┆ proxy_pass $upstream;
+            ⋮┆----------------------------------------
+           41┆ proxy_pass $upstream;
