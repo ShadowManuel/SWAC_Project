@@ -46,7 +46,7 @@ POST http://localhost:5002/api/ticket/999/eskalieren
 
 ###
 
-POST http://localhost:5002/api/ticket/2/uebernehmen
+POST http://localhost:5002/api/ticket/3002/uebernehmen
 Content-Type: application/json
 
 {
@@ -55,8 +55,12 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:5002/api/ticket/2/erledigen
+POST http://localhost:5002/api/ticket/3002/erledigen
 
 ###
 
 GET http://localhost:5002/api/ticket/meine?bearbeiter=Salem
+
+###
+
+GET http://localhost:5003/api/logs
