@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using ticketapi.Daten;
+using ticketapi.Services;
 
 namespace ticketapi
 {
@@ -21,6 +22,9 @@ namespace ticketapi
 
             builder.Services.AddDbContext<TicketDatenbank>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("TicketDb")));
+
+            builder.Services.AddHttpClient<LogClient>(c =>
+            c.BaseAddress = new Uri("http://logging-api:8080/"));
 
             builder.Services.AddCors(options =>
             options.AddPolicy("Frontend", policy => policy

@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ticketapi.Daten;
 using ticketapi.Models;
-using Microsoft.EntityFrameworkCore;
+using ticketapi.Services;
 
 namespace ticketapi.Controllers
 {
@@ -12,10 +13,12 @@ namespace ticketapi.Controllers
     {
 
         private readonly TicketDatenbank _db;
+        private readonly LogClient _log;
 
-        public TicketController(TicketDatenbank db)
+        public TicketController(TicketDatenbank db, LogClient log)
         {
             _db = db;
+            _log = log;
         }
 
 
@@ -47,6 +50,7 @@ namespace ticketapi.Controllers
 
             _db.Tickets.Add(ticket);
             await _db.SaveChangesAsync();
+            await _log.LogAsync($"Ticket {ticket.Id} erstellt (Level {ticket.Level})");
 
             return Ok(ticket);
         }
@@ -105,6 +109,7 @@ namespace ticketapi.Controllers
             ticket.Status = TicketStatus.Erledigt;
 
             await _db.SaveChangesAsync();
+            await _log.LogAsync($"Ticket {ticket.Id} abgeschlossen (Level {ticket.Level})");
             return Ok(ticket);
         }
 
