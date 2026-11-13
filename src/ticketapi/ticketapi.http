@@ -1,6 +1,62 @@
-@ticketapi_HostAddress = http://localhost:5126
+POST http://localhost:5002/api/ticket
+Content-Type: application/json
 
-GET {{ticketapi_HostAddress}}/weatherforecast/
-Accept: application/json
+{
+  "titel": "Verdächtige Mail",
+  "beschreibung": "Mail mit Link zu gefälschter Bank-Seite",
+  "kategorie": "Phishing",
+  "ersteller": "Elias"
+}
 
 ###
+
+POST http://localhost:5002/api/ticket
+Content-Type: application/json
+
+{
+  "titel": "Login geht nicht",
+  "beschreibung": "Passwort wird nicht akzeptiert",
+  "kategorie": "Logging",
+  "ersteller": "Elias"
+}
+
+###
+
+GET http://localhost:5002/api/ticket
+
+###
+
+GET http://localhost:5002/api/ticket?level=1
+
+###
+
+GET http://localhost:5002/api/ticket?level=2
+
+###
+
+GET http://localhost:5002/api/ticket?level=3
+
+###
+
+POST http://localhost:5002/api/ticket/1/eskalieren
+
+###
+
+POST http://localhost:5002/api/ticket/999/eskalieren
+
+###
+
+POST http://localhost:5002/api/ticket/2/uebernehmen
+Content-Type: application/json
+
+{
+  "bearbeiter": "Salem"
+}
+
+###
+
+POST http://localhost:5002/api/ticket/2/erledigen
+
+###
+
+GET http://localhost:5002/api/ticket/meine?bearbeiter=Salem
