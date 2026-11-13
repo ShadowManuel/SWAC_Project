@@ -3,394 +3,483 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SIMS Testseite</title>
+<title>HelpDesk</title>
 <style>
-  :root { --accent:#2F4BC0; --line:#D0D5E2; --muted:#4B5563; --bg:#F1F3F9; --ink:#1F2937; }
+  :root { --accent:#2F4BC0; --accent-soft:#E6EBFB; --line:#E3E6EE; --muted:#5B6475; --bg:#F7F8FB; --ink:#1B2233; --ok:#0B6B50; --ok-bg:#DDF3EA; --warn:#8A4B00; --warn-bg:#FDEBD0; --bad:#8A1C1C; --bad-bg:#FBE3E3; --info-bg:#E3EAFE; }
   * { box-sizing:border-box; }
-  body { margin:0; font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink); background:var(--bg); }
-  header { background:#fff; border-bottom:1px solid var(--line); padding:16px 24px; display:flex; flex-direction:column; gap:12px; }
-  h1 { margin:0; font-size:20px; }
-  h2 { margin:0 0 12px; font-size:16px; }
-  h3 { margin:6px 0 10px; font-size:14px; }
-  main { padding:24px; display:flex; flex-direction:column; gap:28px; max-width:1500px; margin:0 auto; }
-  .row { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; }
-  .f { display:flex; flex-direction:column; gap:3px; margin-bottom:8px; flex:1 1 140px; min-width:0; }
-  label { font-size:12px; font-weight:600; color:var(--muted); }
-  input, select { min-height:36px; border:1px solid #8A93AB; border-radius:6px; padding:0 10px; font:inherit; background:#fff; color:var(--ink); width:100%; }
-  button { min-height:40px; padding:0 16px; border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:6px; font:600 14px system-ui,sans-serif; cursor:pointer; }
-  button.alt { background:#fff; color:var(--accent); }
-  button:disabled { opacity:.55; cursor:wait; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:16px; align-items:start; }
-  .card { background:#fff; border:1px solid var(--line); border-radius:8px; padding:16px; }
-  .head { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  .head code { font-size:13px; word-break:break-all; }
-  .m { font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; }
-  .m-GET { background:#DBE4FF; color:#1E3A8A; }
-  .m-POST { background:#D5F0E8; color:#0B4F3F; }
-  .m-PUT, .m-PATCH { background:#FFE8CC; color:#7A3500; }
-  .out { margin-top:12px; font-size:13px; }
-  .out pre { margin:8px 0 0; max-height:260px; overflow:auto; background:#F6F7FB; border:1px solid var(--line); border-radius:6px; padding:10px; font:12px/1.5 ui-monospace,Menlo,Consolas,monospace; white-space:pre-wrap; word-break:break-word; }
-  .tag { display:inline-block; font-weight:700; padding:2px 8px; border-radius:999px; font-size:12px; }
-  .t-ok { background:#D5F0E8; color:#0B4F3F; }
-  .t-expected { background:#DBE4FF; color:#1E3A8A; }
-  .t-bad { background:#FDE8E8; color:#7F1D1D; }
-  .t-net { background:#374151; color:#fff; }
-  .problems { margin:6px 0 0; padding-left:18px; color:#7F1D1D; }
-  .notes { margin:6px 0 0; padding-left:18px; color:var(--muted); }
-  .hint { color:var(--muted); font-size:12px; }
-  #demo { background:#fff; border:1px solid var(--line); border-radius:8px; padding:16px; }
-  #demo ol { margin:8px 0 0; padding-left:20px; }
-  #demo li { margin-bottom:6px; }
+  html, body { height:100%; }
+  body { margin:0; font:14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:var(--bg); }
+  h1 { margin:0; font-size:26px; }
+  h2 { margin:0 0 4px; font-size:16px; }
+  button { font:inherit; cursor:pointer; }
+  input, select, textarea { font:inherit; color:var(--ink); background:#fff; border:1px solid #B8BFD0; border-radius:8px; padding:0 12px; min-height:40px; width:100%; }
+  textarea { padding:10px 12px; min-height:96px; resize:vertical; }
+  input:focus, select:focus, textarea:focus, button:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  label { display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px; }
+  .btn { min-height:40px; padding:0 16px; border-radius:8px; border:1px solid var(--accent); background:var(--accent); color:#fff; font-weight:600; }
+  .btn.ghost { background:#fff; color:var(--accent); }
+  .btn.danger { background:#fff; color:var(--bad); border-color:#D9A3A3; }
+  .btn:disabled { opacity:.55; cursor:wait; }
+  .hidden { display:none !important; }
+
+  /* Login */
+  #login { min-height:100%; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .login-card { width:100%; max-width:400px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:32px; }
+  .brand { font-size:22px; font-weight:800; color:var(--accent); letter-spacing:-.3px; }
+  .login-card .brand { margin-bottom:4px; }
+  .login-card .sub { color:var(--muted); margin-bottom:24px; }
+  .field { margin-bottom:14px; }
+  .login-card .btn { width:100%; margin-top:6px; }
+  .switch { margin-top:16px; text-align:center; color:var(--muted); }
+  .switch button { background:none; border:none; color:var(--accent); font-weight:600; padding:0 0 0 4px; }
+  .err { margin:0 0 14px; padding:10px 12px; border-radius:8px; background:var(--bad-bg); color:var(--bad); }
+
+  /* Shell */
+  #shell { display:flex; min-height:100%; }
+  aside { width:248px; flex:none; background:#fff; border-right:1px solid var(--line); display:flex; flex-direction:column; padding:20px 12px; position:sticky; top:0; height:100vh; }
+  aside .brand { padding:0 8px 22px; }
+  nav button { display:flex; align-items:center; justify-content:space-between; width:100%; text-align:left; background:none; border:none; padding:10px 12px; border-radius:8px; color:var(--ink); margin-bottom:4px; }
+  nav button:hover { background:#F0F2F8; }
+  nav button.on { background:var(--accent-soft); color:var(--accent); font-weight:700; }
+  .pill { font-size:11px; border:1px solid #9AA3B8; color:var(--muted); border-radius:4px; padding:0 6px; background:#fff; }
+  .who { margin-top:auto; border-top:1px solid var(--line); padding:14px 8px 0; }
+  .who button { background:none; border:none; padding:8px 0 0; color:var(--ink); }
+  main { flex:1; min-width:0; padding:28px 40px 48px; }
+  .top { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:22px; }
+  .panel { background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px; margin-bottom:20px; }
+  .filters { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:16px; }
+
+  /* Tabellen */
+  .tablewrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; }
+  th { text-align:left; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); padding:12px; border-bottom:1px solid #CBD1DF; white-space:nowrap; }
+  td { padding:14px 12px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  td.nr { color:var(--muted); white-space:nowrap; }
+  td.title { font-weight:600; min-width:200px; }
+  td.act { text-align:right; }
+  .empty { padding:36px 12px; text-align:center; color:var(--muted); }
+  .badge { display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:700; white-space:nowrap; }
+  .b-Offen, .b-Info { background:var(--info-bg); color:#1E3A8A; }
+  .b-InBearbeitung, .b-Warning { background:var(--warn-bg); color:var(--warn); }
+  .b-Erledigt { background:var(--ok-bg); color:var(--ok); }
+  .b-Error { background:var(--bad-bg); color:var(--bad); }
+  .b-Admin { background:#EADFFB; color:#4B1D8F; }
+  .b-User { background:#EDEFF5; color:#3B4457; }
+  .muted { color:var(--muted); }
+  .foot { display:flex; justify-content:space-between; align-items:center; padding-top:14px; border-top:1px solid var(--line); margin-top:4px; gap:12px; flex-wrap:wrap; }
+  .foot .btns { display:flex; gap:8px; }
+
+  /* Kacheln */
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:20px; }
+  .tile { background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 20px; }
+  .tile .n { font-size:32px; font-weight:800; line-height:1.1; }
+  .tile .l { color:var(--muted); margin-top:4px; }
+
+  /* Dialog */
+  .overlay { position:fixed; inset:0; background:rgba(20,27,45,.45); display:flex; align-items:center; justify-content:center; padding:24px; z-index:10; }
+  .dialog { background:#fff; border-radius:12px; width:100%; max-width:560px; max-height:100%; overflow:auto; padding:24px; }
+  .dialog h2 { font-size:20px; margin-bottom:16px; }
+  .dl { display:grid; grid-template-columns:140px 1fr; gap:8px 12px; margin-bottom:16px; }
+  .dl dt { color:var(--muted); }
+  .dl dd { margin:0; }
+  .desc { background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:12px; white-space:pre-wrap; margin-bottom:16px; }
+  .actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+  /* Diagnose */
+  .steps { margin:12px 0 0; padding-left:20px; }
+  .steps li { margin-bottom:6px; }
+  .steps .why { color:var(--bad); }
+
+  @media (max-width: 900px) {
+    #shell { flex-direction:column; }
+    aside { width:100%; height:auto; position:static; flex-direction:row; flex-wrap:wrap; align-items:center; padding:10px; }
+    aside .brand { padding:0 12px 0 4px; }
+    nav { display:flex; flex-wrap:wrap; }
+    .who { margin:0 0 0 auto; border:none; padding:0; }
+    main { padding:20px 16px 40px; }
+    .filters { grid-template-columns:1fr 1fr; }
+  }
 </style>
 </head>
 <body>
-<header>
-  <h1>SIMS Testseite: Verbindungen der Services prüfen</h1>
-  <div class="row">
-    <div class="f"><label for="base-auth">auth-api</label><input id="base-auth"></div>
-    <div class="f"><label for="base-tickets">ticketapi</label><input id="base-tickets"></div>
-    <div class="f"><label for="base-logs">logging-api</label><input id="base-logs"></div>
-  </div>
-  <div class="row">
-    <button id="btn-health" type="button">Alle Services prüfen</button>
-    <button id="btn-proxy" type="button" class="alt">Adressen: über nginx (Standard)</button>
-    <button id="btn-direct" type="button" class="alt">Adressen: direkt über Ports 5001 bis 5003</button>
-  </div>
-  <div class="row" style="align-items:center">
-    <span id="health" class="hint">Noch nicht geprüft.</span>
-    <span id="session" class="hint">Nicht angemeldet.</span>
-  </div>
-  <div class="hint">Standard: Die Seite ruft die APIs über den nginx-Container auf (gleiche Adresse, kein CORS nötig). "Direkt" ruft die Ports im Browser auf und braucht CORS in jeder API. Jeder Button ruft genau einen Endpoint des echten Backends auf und prüft die Antwort (Feldnamen, Statuscodes, erlaubte Werte).</div>
-</header>
-<main>
-  <section id="demo">
-    <h2>Demo-Durchlauf</h2>
-    <div class="hint">Spielt den kompletten Ablauf durch und prüft dabei auch die Verbindungen zwischen den Services (ticketapi und auth-api schreiben ins Logging): User anlegen, anmelden, Ticket anlegen, übernehmen, eskalieren, erledigen, Logs prüfen. Legt dabei einen Test-User und ein Test-Ticket an.</div>
-    <div class="row" style="margin-top:10px"><button id="btn-demo" type="button">Demo-Durchlauf starten</button></div>
-    <ol id="demo-out"></ol>
-  </section>
-  <div id="app"></div>
-</main>
-<noscript>Diese Seite braucht JavaScript.</noscript>
+
+<div id="login" class="hidden">
+  <form class="login-card" id="login-form" autocomplete="on">
+    <div class="brand">HelpDesk</div>
+    <div class="sub" id="login-sub">Bitte anmelden</div>
+    <div class="err hidden" id="login-err" role="alert"></div>
+    <div class="field"><label for="l-user">Benutzername</label><input id="l-user" name="username" autocomplete="username" required></div>
+    <div class="field"><label for="l-pass">Passwort</label><input id="l-pass" name="password" type="password" autocomplete="current-password" required></div>
+    <button class="btn" id="l-submit" type="submit">Anmelden</button>
+    <div class="switch"><span id="l-switch-text">Noch kein Konto?</span><button type="button" id="l-switch">Registrieren</button></div>
+  </form>
+</div>
+
+<div id="shell" class="hidden">
+  <aside>
+    <div class="brand">HelpDesk</div>
+    <nav id="nav"></nav>
+    <div class="who">
+      <div id="who-text"></div>
+      <button type="button" id="logout">Abmelden</button>
+    </div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<div id="modal" class="overlay hidden"></div>
+
 <script>
-// ---------- Konfiguration: das echte Backend (Stand main) ----------
-const PROXY = { auth: '/auth-api', tickets: '/ticket-api', logs: '/logging-api' };
-const DIRECT = { auth: 'http://localhost:5001', tickets: 'http://localhost:5002', logs: 'http://localhost:5003' };
-const SERVICES = [
-  { key: 'auth',    title: 'auth-api' },
-  { key: 'tickets', title: 'ticketapi' },
-  { key: 'logs',    title: 'logging-api' },
-];
-const KATEGORIE = ['Phishing', 'Logging', 'Malware', 'Connecting', 'Other'];
-const STATUS = ['Offen', 'InBearbeitung', 'Erledigt'];
-const USER_KEYS = ['id', 'username', 'role', 'supportLevel'];
-const USERLIST_KEYS = [...USER_KEYS, 'isActive'];
-const TICKET_KEYS = ['id', 'titel', 'beschreibung', 'ersteller', 'bearbeiter', 'kategorie', 'status', 'level', 'erstelltAm'];
-const LOG_KEYS = ['id', 'timestamp', 'level', 'service', 'message'];
-const TICKET_ENUMS = { kategorie: KATEGORIE, status: STATUS };
-const ROLE_ENUM = { role: ['User', 'Admin'] };
+// ---------- Konfiguration ----------
+const BASE = { auth: '/auth-api', tickets: '/ticket-api', logs: '/logging-api' };
+const KATEGORIEN = ['Phishing', 'Logging', 'Malware', 'Connecting', 'Other'];
+const STATUS_LABEL = { Offen: 'Offen', InBearbeitung: 'In Bearbeitung', Erledigt: 'Erledigt' };
+const PAGE_SIZE = 8;
 
-// ok = Erfolgsstatus, errs = Fehlerstatus, die der Code bewusst liefert.
-// loc: path | query | body. nullable: leeres Feld wird als null gesendet.
-const ENDPOINTS = [
-  { id: 'login', svc: 'auth', method: 'POST', path: '/api/auth/login', title: 'Login',
-    ok: [200], errs: [400, 401], shape: 'obj', keys: USER_KEYS, enums: ROLE_ENUM,
-    fields: [
-      { n: 'username', l: 'Benutzername', v: 'demo', loc: 'body' },
-      { n: 'password', l: 'Passwort', v: 'Sicher123!', t: 'password', loc: 'body' } ],
-    onOk: (d) => setSession(d) },
-  { id: 'users-list', svc: 'auth', method: 'GET', path: '/api/users', title: 'User auflisten',
-    ok: [200], errs: [], shape: 'array', keys: USERLIST_KEYS, enums: ROLE_ENUM, fields: [] },
-  { id: 'users-create', svc: 'auth', method: 'POST', path: '/api/users', title: 'User anlegen',
-    ok: [201], errs: [400, 409], shape: 'obj', keys: USER_KEYS, enums: ROLE_ENUM,
-    fields: [
-      { n: 'username', l: 'Benutzername (3 bis 50 Zeichen)', v: 'demo', loc: 'body' },
-      { n: 'password', l: 'Passwort (mindestens 8 Zeichen)', v: 'Sicher123!', t: 'password', loc: 'body' } ] },
-
-  { id: 'ticket-list', svc: 'tickets', method: 'GET', path: '/api/ticket', title: 'Offene Tickets auflisten (nur Status Offen)',
-    ok: [200], errs: [], shape: 'array', keys: TICKET_KEYS, enums: TICKET_ENUMS,
-    fields: [ { n: 'level', l: 'level (optional, 1 bis 3)', v: '', t: 'number', loc: 'query' } ] },
-  { id: 'ticket-create', svc: 'tickets', method: 'POST', path: '/api/ticket', title: 'Ticket anlegen',
-    ok: [200, 201], errs: [400], shape: 'obj', keys: TICKET_KEYS, enums: TICKET_ENUMS,
-    fields: [
-      { n: 'titel', l: 'Titel', v: 'Verdächtige Logins am VPN-Gateway', loc: 'body' },
-      { n: 'beschreibung', l: 'Beschreibung', v: 'Viele fehlgeschlagene Logins in kurzer Zeit.', loc: 'body' },
-      { n: 'kategorie', l: 'Kategorie (Phishing und Malware starten auf Level 2)', v: 'Logging', t: 'select', o: KATEGORIE, loc: 'body' },
-      { n: 'ersteller', l: 'Ersteller (nach Login automatisch)', v: 'demo', loc: 'body' } ],
-    onOk: (d) => setTicketId(d.id) },
-  { id: 'ticket-take', svc: 'tickets', method: 'POST', path: '/api/ticket/{id}/uebernehmen', title: 'Ticket übernehmen',
-    ok: [200], errs: [400, 404, 409], shape: 'obj', keys: TICKET_KEYS, enums: TICKET_ENUMS,
-    fields: [
-      { n: 'id', l: 'Ticket-Id', v: '1', t: 'number', loc: 'path' },
-      { n: 'bearbeiter', l: 'Bearbeiter (nach Login automatisch)', v: 'demo', loc: 'body' } ] },
-  { id: 'ticket-escalate', svc: 'tickets', method: 'POST', path: '/api/ticket/{id}/eskalieren', title: 'Ticket eskalieren',
-    ok: [200], errs: [404, 409], shape: 'obj', keys: TICKET_KEYS, enums: TICKET_ENUMS,
-    fields: [ { n: 'id', l: 'Ticket-Id', v: '1', t: 'number', loc: 'path' } ] },
-  { id: 'ticket-done', svc: 'tickets', method: 'POST', path: '/api/ticket/{id}/erledigen', title: 'Ticket erledigen',
-    ok: [200], errs: [404, 409], shape: 'obj', keys: TICKET_KEYS, enums: TICKET_ENUMS,
-    fields: [ { n: 'id', l: 'Ticket-Id', v: '1', t: 'number', loc: 'path' } ] },
-  { id: 'ticket-mine', svc: 'tickets', method: 'GET', path: '/api/ticket/meine', title: 'Meine Tickets (in Bearbeitung)',
-    ok: [200], errs: [], shape: 'array', keys: TICKET_KEYS, enums: TICKET_ENUMS,
-    fields: [ { n: 'bearbeiter', l: 'Bearbeiter', v: 'demo', loc: 'query' } ] },
-
-  { id: 'log-write', svc: 'logs', method: 'POST', path: '/api/logs', title: 'Log-Eintrag schreiben',
-    ok: [201], errs: [400], shape: 'none',
-    fields: [
-      { n: 'level', l: 'Level', v: 'Info', t: 'select', o: ['Info', 'Warning', 'Error'], loc: 'body' },
-      { n: 'service', l: 'Service', v: 'Testseite', loc: 'body' },
-      { n: 'message', l: 'Nachricht', v: 'Test-Eintrag von der Testseite', loc: 'body' } ] },
-  { id: 'log-read', svc: 'logs', method: 'GET', path: '/api/logs', title: 'Logs lesen',
-    ok: [200], errs: [], shape: 'array', keys: LOG_KEYS, enums: { level: ['Info', 'Warning', 'Error'] },
-    fields: [ { n: 'limit', l: 'limit (optional, 1 bis 1000, Standard 100)', v: '20', t: 'number', loc: 'query' } ] },
-];
-const byId = (id) => ENDPOINTS.find((e) => e.id === id);
-
-// ---------- Hilfsfunktionen ----------
-function h(tag, attrs = {}, ...kids) {
-  const el = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    if (k === 'class') el.className = v;
-    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
-    else el.setAttribute(k, v);
-  }
-  for (const kid of kids.flat()) el.append(kid);
-  return el;
-}
 const $ = (id) => document.getElementById(id);
-const baseUrl = (svc) => $('base-' + svc).value.trim().replace(/\/+$/, '');
-function setBases(map) { for (const s of SERVICES) $('base-' + s.key).value = map[s.key]; }
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-function setField(id, value) { const el = $(id); if (el) el.value = value; }
-function setSession(user) {
-  $('session').textContent = 'Angemeldet als ' + user.username + ' (Id ' + user.id + ', Rolle ' + user.role + ', Support-Level ' + user.supportLevel + ')';
-  setField('ticket-create-ersteller', user.username);
-  setField('ticket-take-bearbeiter', user.username);
-  setField('ticket-mine-bearbeiter', user.username);
-}
-function setTicketId(id) {
-  for (const c of ['ticket-take', 'ticket-escalate', 'ticket-done']) setField(c + '-id', id);
-}
-
-// ---------- Request bauen und senden ----------
-function defaultsOf(def, overrides = {}) {
-  const v = {};
-  for (const f of def.fields) v[f.n] = String(f.v ?? '');
-  return { ...v, ...overrides };
-}
-function valuesFromDom(def) {
-  const v = {};
-  for (const f of def.fields) {
-    const raw = $(def.id + '-' + f.n).value;
-    v[f.n] = f.t === 'password' ? raw : raw.trim();
-  }
-  return v;
-}
-function buildRequest(def, values) {
-  let path = def.path;
-  const query = [];
-  const body = {};
-  let hasBody = false;
-  for (const f of def.fields) {
-    const raw = values[f.n] ?? '';
-    if (f.loc === 'path') { path = path.replace('{' + f.n + '}', encodeURIComponent(raw)); continue; }
-    if (f.loc === 'query') { if (raw !== '') query.push(f.n + '=' + encodeURIComponent(raw)); continue; }
-    hasBody = true;
-    body[f.n] = (raw === '' && f.nullable) ? null : raw;
-  }
-  return { path, query: query.join('&'), body: hasBody ? body : null };
-}
-
-const ISO = /^\d{4}-\d{2}-\d{2}T[\d:.]+Z?$/;
-function checkItem(def, item, where, notes) {
-  const p = [];
-  if (typeof item !== 'object' || item === null) return [where + ' ist kein Objekt'];
-  for (const k of def.keys) if (!(k in item)) p.push(where + ': Feld "' + k + '" fehlt');
-  for (const [k, allowed] of Object.entries(def.enums || {})) {
-    if (k in item && !allowed.includes(item[k])) p.push(where + ': ' + k + '="' + item[k] + '" ist nicht erlaubt (' + allowed.join(' | ') + ')');
-  }
-  for (const k of ['erstelltAm', 'timestamp']) {
-    if (typeof item[k] === 'string') {
-      if (!ISO.test(item[k])) p.push(where + ': ' + k + ' ist kein ISO-8601-Zeitstempel');
-      else if (!item[k].endsWith('Z')) notes.push(k + ' hat keine Zeitzone (kein Z am Ende). Der Browser liest das dann als lokale Zeit.');
-    }
-  }
-  return p;
-}
-function evaluate(def, status, data) {
-  const notes = [];
-  if (def.ok.includes(status)) {
-    const problems = [];
-    if (def.shape === 'obj') problems.push(...checkItem(def, data, 'Antwort', notes));
-    if (def.shape === 'array') {
-      if (!Array.isArray(data)) problems.push('Antwort sollte ein Array sein');
-      else if (data.length) problems.push(...checkItem(def, data[0], 'Eintrag 1', notes));
-    }
-    return { state: problems.length ? 'bad' : 'ok', problems, notes: [...new Set(notes)] };
-  }
-  if (def.errs.includes(status)) return { state: 'expected', problems: [], notes };
-  const hint = status === 503 ? ' Der Service meldet 503: meist ist seine Datenbank nicht erreichbar.' : '';
-  return { state: 'bad', notes,
-    problems: ['Status ' + status + ' ist hier nicht vorgesehen (erlaubt: ' + [...def.ok, ...def.errs].join(', ') + ').' + hint] };
-}
-
-async function send(def, values) {
-  const { path, query, body } = buildRequest(def, values);
-  const url = baseUrl(def.svc) + path + (query ? '?' + query : '');
-  const opt = { method: def.method, headers: {} };
-  if (body) { opt.headers['Content-Type'] = 'application/json'; opt.body = JSON.stringify(body); }
-  const t0 = performance.now();
-  const ms = () => Math.round(performance.now() - t0);
+// ---------- API ----------
+async function api(svc, method, path, body) {
+  const opt = { method, headers: {} };
+  if (body !== undefined) { opt.headers['Content-Type'] = 'application/json'; opt.body = JSON.stringify(body); }
   let res;
-  try {
-    res = await fetch(url, opt);
-  } catch (e) {
-    return { state: 'net', url, ms: ms(), data: null, text: '', notes: [],
-      problems: ['Keine Verbindung zu ' + url + '. Läuft der Container? Bei "direkt": Ist CORS für ' + location.origin + ' freigegeben? (Mit der Standard-Einstellung über nginx braucht es kein CORS.)'] };
-  }
+  try { res = await fetch(BASE[svc] + path, opt); }
+  catch (e) { return { ok: false, status: 0, data: null, text: '', net: true }; }
   const text = await res.text();
-  if (res.status === 502 || res.status === 504) {
-    return { state: 'net', url, status: res.status, ms: ms(), data: null, text, notes: [],
-      problems: ['nginx erreicht den Service nicht (Status ' + res.status + '). Der Container läuft nicht, startet noch oder ist abgestürzt: docker compose ps und docker compose logs <service> prüfen.'] };
-  }
   let data = null;
   try { data = text ? JSON.parse(text) : null; } catch (e) { data = null; }
-  return { ...evaluate(def, res.status, data), url, status: res.status, ms: ms(), data, text };
+  const down = res.status === 502 || res.status === 503 || res.status === 504;
+  return { ok: res.ok, status: res.status, data, text, net: false, down };
+}
+function problem(r, fallback) {
+  if (r.net) return 'Keine Verbindung zum Server.';
+  if (r.status === 502 || r.status === 504) return 'Der Service ist gerade nicht erreichbar.';
+  if (r.status === 503) return 'Der Service meldet ein Problem mit seiner Datenbank.';
+  if (r.status === 409) return fallback || 'Die Aktion ist im aktuellen Status nicht möglich.';
+  if (r.status === 401) return 'Benutzername oder Passwort ist falsch.';
+  if (r.data && r.data.errors) return Object.values(r.data.errors).flat().join(' ');
+  if (r.data && r.data.error) return r.data.error;
+  if (r.text && r.text.length < 200 && !r.text.startsWith('{')) return r.text;
+  return fallback || ('Fehler ' + r.status);
 }
 
-// ---------- Anzeige ----------
-const LABEL = { ok: 'Vertrag erfüllt', expected: 'Fehlerfall wie vorgesehen', bad: 'Abweichung', net: 'Nicht erreichbar' };
-function show(out, r) {
-  out.replaceChildren();
-  out.append(h('span', { class: 'tag t-' + r.state }, LABEL[r.state]), ' ' + (r.status ? r.status + ' · ' : '') + r.ms + ' ms');
-  if (r.problems.length) out.append(h('ul', { class: 'problems' }, r.problems.map((p) => h('li', {}, p))));
-  if (r.notes && r.notes.length) out.append(h('ul', { class: 'notes' }, r.notes.map((p) => h('li', {}, 'Hinweis: ' + p))));
-  const shown = r.data !== null ? JSON.stringify(r.data, null, 2) : (r.text || '(kein Body)');
-  out.append(h('pre', {}, shown.length > 4000 ? shown.slice(0, 4000) + '\n... gekürzt' : shown));
+// ---------- Zustand ----------
+const state = {
+  me: null, view: 'start',
+  tickets: [], users: [], logs: [], loaded: false,
+  filter: { q: '', status: '', level: '', bearbeiter: '' }, page: 1,
+  logFilter: { level: '', limit: '100' },
+  error: '',
+};
+function saveMe() { try { state.me ? sessionStorage.setItem('me', JSON.stringify(state.me)) : sessionStorage.removeItem('me'); } catch (e) {} }
+function loadMe() { try { return JSON.parse(sessionStorage.getItem('me') || 'null'); } catch (e) { return null; } }
+
+// ---------- Format ----------
+const p2 = (n) => String(n).padStart(2, '0');
+function fmtDate(s) { const d = new Date(s); return isNaN(d) ? '' : p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.'; }
+function fmtDateTime(s) { const d = new Date(s); return isNaN(d) ? '' : p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.' + d.getFullYear() + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes()); }
+function fmtTime(s) { const d = new Date(s); return isNaN(d) ? '' : fmtDate(s) + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds()); }
+const badge = (cls, text) => '<span class="badge b-' + esc(cls) + '">' + esc(text) + '</span>';
+
+// ---------- Daten laden ----------
+async function loadUsers() {
+  const r = await api('auth', 'GET', '/api/users');
+  if (r.ok && Array.isArray(r.data)) state.users = r.data;
+  return r;
 }
-function card(def) {
-  const out = h('div', { class: 'out', 'aria-live': 'polite' });
-  const fields = def.fields.map((f) => {
-    const id = def.id + '-' + f.n;
-    let input;
-    if (f.t === 'select') {
-      input = h('select', { id }, f.o.map((o) => h('option', { value: o }, o)));
-      input.value = f.v;
-    } else {
-      input = h('input', { id, type: f.t || 'text', value: f.v ?? '' });
-    }
-    return h('div', { class: 'f' }, h('label', { for: id }, f.l + (f.loc === 'path' ? ' (in der URL)' : '')), input);
-  });
-  const btn = h('button', { type: 'button' }, 'Senden');
-  btn.addEventListener('click', async () => {
-    btn.disabled = true;
-    const r = await send(def, valuesFromDom(def));
-    show(out, r);
-    if ((r.state === 'ok') && def.onOk && r.data) def.onOk(r.data);
-    btn.disabled = false;
-  });
-  return h('section', { class: 'card' },
-    h('div', { class: 'head' }, h('span', { class: 'm m-' + def.method }, def.method), h('code', {}, def.path)),
-    h('h3', {}, def.title), fields, btn, out);
+async function loadTickets() {
+  state.error = '';
+  const [open, us] = await Promise.all([api('tickets', 'GET', '/api/ticket'), loadUsers()]);
+  if (!open.ok || !Array.isArray(open.data)) { state.error = 'Tickets konnten nicht geladen werden: ' + problem(open); state.tickets = []; state.loaded = true; return; }
+  const map = new Map(open.data.map((t) => [t.id, t]));
+  const names = new Set(state.users.filter((u) => u.isActive !== false).map((u) => u.username));
+  if (state.me) names.add(state.me.username);
+  const mine = await Promise.all([...names].map((n) => api('tickets', 'GET', '/api/ticket/meine?bearbeiter=' + encodeURIComponent(n))));
+  for (const r of mine) if (r.ok && Array.isArray(r.data)) for (const t of r.data) map.set(t.id, t);
+  state.tickets = [...map.values()].sort((a, b) => b.id - a.id);
+  state.loaded = true;
+}
+async function loadLogs() {
+  state.error = '';
+  const r = await api('logs', 'GET', '/api/logs?limit=' + encodeURIComponent(state.logFilter.limit));
+  if (r.ok && Array.isArray(r.data)) state.logs = r.data; else { state.logs = []; state.error = 'Logs konnten nicht geladen werden: ' + problem(r); }
+}
+
+// ---------- Login ----------
+let registerMode = false;
+function setMode(reg) {
+  registerMode = reg;
+  $('login-sub').textContent = reg ? 'Neues Konto anlegen' : 'Bitte anmelden';
+  $('l-submit').textContent = reg ? 'Konto anlegen' : 'Anmelden';
+  $('l-switch-text').textContent = reg ? 'Schon ein Konto?' : 'Noch kein Konto?';
+  $('l-switch').textContent = reg ? 'Anmelden' : 'Registrieren';
+  $('l-pass').autocomplete = reg ? 'new-password' : 'current-password';
+  $('login-err').classList.add('hidden');
+}
+function loginError(msg) { const e = $('login-err'); e.textContent = msg; e.classList.remove('hidden'); }
+async function doLogin(username, password) {
+  const r = await api('auth', 'POST', '/api/auth/login', { username, password });
+  if (!r.ok) { loginError(problem(r)); return false; }
+  state.me = r.data; saveMe();
+  return true;
+}
+$('login-form').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const username = $('l-user').value.trim(), password = $('l-pass').value;
+  const btn = $('l-submit'); btn.disabled = true; $('login-err').classList.add('hidden');
+  if (registerMode) {
+    const c = await api('auth', 'POST', '/api/users', { username, password });
+    if (!c.ok) { loginError(c.status === 409 ? 'Dieser Benutzername ist schon vergeben.' : problem(c)); btn.disabled = false; return; }
+  }
+  const ok = await doLogin(username, password);
+  btn.disabled = false;
+  if (ok) { $('l-pass').value = ''; enterApp('tickets'); }
+});
+$('l-switch').addEventListener('click', () => setMode(!registerMode));
+$('logout').addEventListener('click', () => {
+  state.me = null; saveMe(); state.loaded = false; state.tickets = [];
+  $('shell').classList.add('hidden'); $('login').classList.remove('hidden'); setMode(false);
+});
+
+// ---------- Shell ----------
+const NAV = [
+  { id: 'start', label: 'Startseite' },
+  { id: 'tickets', label: 'Tickets' },
+  { id: 'users', label: 'Nutzer', admin: true },
+  { id: 'logs', label: 'Logs', admin: true },
+  { id: 'diag', label: 'Diagnose' },
+];
+function enterApp(view) {
+  $('login').classList.add('hidden'); $('shell').classList.remove('hidden');
+  $('who-text').innerHTML = 'Angemeldet als <b>' + esc(state.me.username) + '</b>' + (state.me.role === 'Admin' ? '' : ' <span class="muted">(' + esc(state.me.role) + ')</span>');
+  $('nav').innerHTML = NAV.map((n) => '<button type="button" data-view="' + n.id + '">' + esc(n.label) + (n.admin ? '<span class="pill">Admin</span>' : '') + '</button>').join('');
+  go(view);
+}
+$('nav').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-view]'); if (b) go(b.dataset.view); });
+async function go(view) {
+  state.view = view; state.error = '';
+  for (const b of document.querySelectorAll('#nav button')) b.classList.toggle('on', b.dataset.view === view);
+  $('main').innerHTML = '<div class="empty">Lade ...</div>';
+  if (view === 'start' || view === 'tickets') await loadTickets();
+  if (view === 'users') await loadUsers();
+  if (view === 'logs') await loadLogs();
+  render();
 }
 function render() {
-  const app = $('app');
-  for (const s of SERVICES) {
-    app.append(h('h2', {}, s.title), h('div', { class: 'grid', style: 'margin-bottom:28px' },
-      ENDPOINTS.filter((e) => e.svc === s.key).map(card)));
-  }
-  setBases(PROXY);
+  const fn = { start: viewStart, tickets: viewTickets, users: viewUsers, logs: viewLogs, diag: viewDiag }[state.view];
+  $('main').innerHTML = fn();
+  if (state.view === 'diag') bindDiag();
+}
+const errBox = () => state.error ? '<div class="err" role="alert">' + esc(state.error) + '</div>' : '';
+
+// ---------- Startseite ----------
+function viewStart() {
+  const t = state.tickets;
+  const offen = t.filter((x) => x.status === 'Offen');
+  const bearb = t.filter((x) => x.status === 'InBearbeitung');
+  const meine = bearb.filter((x) => x.bearbeiter === state.me.username);
+  const tile = (n, l) => '<div class="tile"><div class="n">' + n + '</div><div class="l">' + l + '</div></div>';
+  const rows = meine.map((x) => '<tr><td class="nr">#' + x.id + '</td><td class="title">' + esc(x.titel) + '</td><td>' + badge(x.status, STATUS_LABEL[x.status]) + '</td><td>Level ' + esc(x.level) + '</td><td class="act"><button class="btn ghost" data-open="' + x.id + '">Öffnen</button></td></tr>').join('');
+  return '<div class="top"><h1>Startseite</h1><button class="btn" data-new>+ Neues Ticket</button></div>' + errBox() +
+    '<div class="tiles">' + tile(offen.length, 'Offene Tickets') + tile(bearb.length, 'In Bearbeitung') + tile(meine.length, 'Meine Tickets') + '</div>' +
+    '<div class="panel"><h2>Meine Tickets</h2>' +
+    (meine.length ? '<div class="tablewrap"><table><thead><tr><th>Nr.</th><th>Titel</th><th>Status</th><th>Level</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+      : '<div class="empty">Keine Tickets in Bearbeitung.</div>') + '</div>';
 }
 
-// ---------- Erreichbarkeit ----------
-const PROBE = { auth: 'users-list', tickets: 'ticket-list', logs: 'log-read' };
-async function checkHealth() {
-  const box = $('health');
-  box.replaceChildren('Prüfe ...');
-  const parts = [];
-  for (const s of SERVICES) {
-    const def = byId(PROBE[s.key]);
-    const r = await send(def, defaultsOf(def, { limit: '1', level: '' }));
-    const up = r.state !== 'net';
-    const extra = up ? ' (' + r.status + (r.state === 'bad' ? ', Antwort weicht ab' : '') + ')' : '';
-    parts.push(h('span', {}, (up ? 'erreichbar: ' : 'NICHT erreichbar: ') + s.title + extra));
-    if (!up) parts.push(h('span', { class: 'hint' }, ' [' + r.problems[0] + ']'));
-  }
-  box.replaceChildren(...parts.flatMap((p, i) => (i && p.className !== 'hint' ? [' | ', p] : [p])));
+// ---------- Tickets ----------
+function filteredTickets() {
+  const f = state.filter, q = f.q.trim().toLowerCase();
+  return state.tickets.filter((t) =>
+    (!q || String(t.titel).toLowerCase().includes(q) || String(t.id).includes(q.replace('#', ''))) &&
+    (!f.status || t.status === f.status) &&
+    (!f.level || String(t.level) === f.level) &&
+    (!f.bearbeiter || (f.bearbeiter === '-' ? !t.bearbeiter : t.bearbeiter === f.bearbeiter)));
+}
+function viewTickets() {
+  const list = filteredTickets();
+  const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  if (state.page > pages) state.page = pages;
+  const slice = list.slice((state.page - 1) * PAGE_SIZE, state.page * PAGE_SIZE);
+  const names = [...new Set(state.tickets.map((t) => t.bearbeiter).filter(Boolean))].sort();
+  const opt = (v, l, cur) => '<option value="' + esc(v) + '"' + (cur === v ? ' selected' : '') + '>' + esc(l) + '</option>';
+  const f = state.filter;
+  const rows = slice.map((t) => '<tr>' +
+    '<td class="nr">#' + t.id + '</td><td class="title">' + esc(t.titel) + '</td><td>' + esc(t.ersteller) + '</td>' +
+    '<td>' + badge(t.status, STATUS_LABEL[t.status] || t.status) + '</td><td>Level ' + esc(t.level) + '</td><td>' + esc(t.kategorie) + '</td>' +
+    '<td>' + (t.bearbeiter ? esc(t.bearbeiter) : '<span class="muted">nicht zugewiesen</span>') + '</td><td>' + fmtDate(t.erstelltAm) + '</td>' +
+    '<td class="act"><button class="btn ghost" data-open="' + t.id + '">Öffnen</button></td></tr>').join('');
+  return '<div class="top"><h1>Tickets</h1><button class="btn" data-new>+ Neues Ticket</button></div>' + errBox() +
+    '<div class="panel filters">' +
+      '<div><label for="f-q">Suche</label><input id="f-q" data-filter="q" placeholder="Titel oder Nr." value="' + esc(f.q) + '"></div>' +
+      '<div><label for="f-s">Status</label><select id="f-s" data-filter="status">' + opt('', 'Alle', f.status) + opt('Offen', 'Offen', f.status) + opt('InBearbeitung', 'In Bearbeitung', f.status) + '</select></div>' +
+      '<div><label for="f-l">Level</label><select id="f-l" data-filter="level">' + opt('', 'Alle', f.level) + opt('1', 'Level 1', f.level) + opt('2', 'Level 2', f.level) + opt('3', 'Level 3', f.level) + '</select></div>' +
+      '<div><label for="f-b">Bearbeiter</label><select id="f-b" data-filter="bearbeiter">' + opt('', 'Alle', f.bearbeiter) + opt('-', 'nicht zugewiesen', f.bearbeiter) + names.map((n) => opt(n, n, f.bearbeiter)).join('') + '</select></div>' +
+    '</div>' +
+    '<div class="panel"><div class="tablewrap"><table><thead><tr><th>Nr.</th><th>Titel</th><th>Einsender</th><th>Status</th><th>Level</th><th>Kategorie</th><th>Bearbeiter</th><th>Erstellt</th><th></th></tr></thead><tbody>' +
+    (rows || '<tr><td colspan="9" class="empty">Keine Tickets gefunden.</td></tr>') + '</tbody></table></div>' +
+    '<div class="foot"><span class="muted">Seite ' + state.page + ' von ' + pages + ' · ' + list.length + ' Tickets</span>' +
+    '<div class="btns"><button class="btn ghost" data-page="-1"' + (state.page <= 1 ? ' disabled' : '') + '>Zurück</button><button class="btn ghost" data-page="1"' + (state.page >= pages ? ' disabled' : '') + '>Weiter</button></div></div></div>';
 }
 
-// ---------- Demo-Durchlauf ----------
-async function runDemo() {
-  const list = $('demo-out');
-  list.replaceChildren();
-  const btn = $('btn-demo');
+// ---------- Nutzer ----------
+function viewUsers() {
+  const rows = state.users.map((u) => '<tr><td class="nr">#' + u.id + '</td><td class="title">' + esc(u.username) + '</td><td>' + badge(u.role, u.role) + '</td><td>Level ' + esc(u.supportLevel) + '</td><td>' + (u.isActive === false ? badge('Error', 'Gesperrt') : badge('Erledigt', 'Aktiv')) + '</td></tr>').join('');
+  return '<div class="top"><h1>Nutzer</h1><button class="btn" data-newuser>+ Neuer Nutzer</button></div>' + errBox() +
+    '<div class="panel"><div class="tablewrap"><table><thead><tr><th>Nr.</th><th>Benutzername</th><th>Rolle</th><th>Support-Level</th><th>Status</th></tr></thead><tbody>' +
+    (rows || '<tr><td colspan="5" class="empty">Keine Nutzer gefunden.</td></tr>') + '</tbody></table></div></div>';
+}
+
+// ---------- Logs ----------
+function viewLogs() {
+  const lf = state.logFilter;
+  const list = state.logs.filter((l) => !lf.level || l.level === lf.level);
+  const opt = (v, l, cur) => '<option value="' + esc(v) + '"' + (cur === v ? ' selected' : '') + '>' + esc(l) + '</option>';
+  const rows = list.map((l) => '<tr><td class="nr">' + fmtTime(l.timestamp) + '</td><td>' + badge(l.level, l.level) + '</td><td>' + esc(l.service) + '</td><td>' + esc(l.message) + '</td></tr>').join('');
+  return '<div class="top"><h1>Logs</h1><button class="btn ghost" data-reload-logs>Aktualisieren</button></div>' + errBox() +
+    '<div class="panel filters" style="grid-template-columns:1fr 1fr 2fr">' +
+      '<div><label for="lg-l">Level</label><select id="lg-l" data-logfilter="level">' + opt('', 'Alle', lf.level) + opt('Info', 'Info', lf.level) + opt('Warning', 'Warning', lf.level) + opt('Error', 'Error', lf.level) + '</select></div>' +
+      '<div><label for="lg-n">Anzahl</label><select id="lg-n" data-logfilter="limit">' + ['50', '100', '200', '500'].map((n) => opt(n, n, lf.limit)).join('') + '</select></div><div></div>' +
+    '</div><div class="panel"><div class="tablewrap"><table><thead><tr><th>Zeit</th><th>Level</th><th>Service</th><th>Nachricht</th></tr></thead><tbody>' +
+    (rows || '<tr><td colspan="4" class="empty">Keine Logeinträge gefunden.</td></tr>') + '</tbody></table></div></div>';
+}
+
+// ---------- Dialoge ----------
+function openModal(html) { $('modal').innerHTML = '<div class="dialog" role="dialog" aria-modal="true">' + html + '</div>'; $('modal').classList.remove('hidden'); const f = $('modal').querySelector('input,textarea,select,button'); if (f) f.focus(); }
+function closeModal() { $('modal').classList.add('hidden'); $('modal').innerHTML = ''; }
+$('modal').addEventListener('click', (ev) => { if (ev.target === $('modal') || ev.target.closest('[data-close]')) closeModal(); });
+document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') closeModal(); });
+
+function ticketDialog(t, msg) {
+  const canTake = t.status === 'Offen';
+  const canEsc = t.status !== 'Erledigt' && t.level < 3;
+  const canDone = t.status === 'InBearbeitung';
+  openModal('<h2>#' + t.id + ' ' + esc(t.titel) + '</h2>' +
+    (msg ? '<div class="err" role="alert">' + esc(msg) + '</div>' : '') +
+    '<dl class="dl"><dt>Status</dt><dd>' + badge(t.status, STATUS_LABEL[t.status] || t.status) + '</dd><dt>Level</dt><dd>Level ' + esc(t.level) + '</dd><dt>Kategorie</dt><dd>' + esc(t.kategorie) + '</dd>' +
+    '<dt>Einsender</dt><dd>' + esc(t.ersteller) + '</dd><dt>Bearbeiter</dt><dd>' + (t.bearbeiter ? esc(t.bearbeiter) : '<span class="muted">nicht zugewiesen</span>') + '</dd><dt>Erstellt</dt><dd>' + fmtDateTime(t.erstelltAm) + '</dd></dl>' +
+    '<div class="desc">' + (esc(t.beschreibung) || '<span class="muted">Keine Beschreibung</span>') + '</div>' +
+    '<div class="actions"><button class="btn ghost" data-close>Schließen</button>' +
+    (canEsc ? '<button class="btn danger" data-act="eskalieren" data-id="' + t.id + '">Eskalieren</button>' : '') +
+    (canTake ? '<button class="btn" data-act="uebernehmen" data-id="' + t.id + '">Übernehmen</button>' : '') +
+    (canDone ? '<button class="btn" data-act="erledigen" data-id="' + t.id + '">Erledigen</button>' : '') + '</div>');
+}
+async function ticketAction(act, id, btn) {
   btn.disabled = true;
-  const stamp = Date.now().toString().slice(-6);
-  const user = 'demo' + stamp;
-  const pw = 'Sicher123!';
-  const ctx = {};
+  const r = await api('tickets', 'POST', '/api/ticket/' + id + '/' + act, act === 'uebernehmen' ? { bearbeiter: state.me.username } : undefined);
+  if (!r.ok) {
+    await loadTickets();
+    const cur = state.tickets.find((x) => x.id === Number(id));
+    render();
+    if (cur) ticketDialog(cur, problem(r, 'Das Ticket hat inzwischen einen anderen Status.')); else closeModal();
+    return;
+  }
+  await loadTickets(); render();
+  act === 'erledigen' ? closeModal() : ticketDialog(r.data);
+}
+function newTicketDialog(msg, v = {}) {
+  openModal('<h2>Neues Ticket</h2>' + (msg ? '<div class="err" role="alert">' + esc(msg) + '</div>' : '') +
+    '<form id="nt-form"><div class="field"><label for="nt-t">Titel</label><input id="nt-t" required value="' + esc(v.titel) + '"></div>' +
+    '<div class="field"><label for="nt-k">Kategorie</label><select id="nt-k">' + KATEGORIEN.map((k) => '<option' + (v.kategorie === k ? ' selected' : '') + '>' + k + '</option>').join('') + '</select></div>' +
+    '<div class="field"><label for="nt-b">Beschreibung</label><textarea id="nt-b" required>' + esc(v.beschreibung) + '</textarea></div>' +
+    '<div class="actions"><button type="button" class="btn ghost" data-close>Abbrechen</button><button class="btn" type="submit">Ticket anlegen</button></div></form>');
+  $('nt-form').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const body = { titel: $('nt-t').value.trim(), beschreibung: $('nt-b').value.trim(), kategorie: $('nt-k').value, ersteller: state.me.username };
+    const r = await api('tickets', 'POST', '/api/ticket', body);
+    if (!r.ok) return newTicketDialog(problem(r), body);
+    closeModal(); await loadTickets(); render();
+  });
+}
+function newUserDialog(msg, v = {}) {
+  openModal('<h2>Neuer Nutzer</h2>' + (msg ? '<div class="err" role="alert">' + esc(msg) + '</div>' : '') +
+    '<form id="nu-form"><div class="field"><label for="nu-n">Benutzername (3 bis 50 Zeichen)</label><input id="nu-n" required value="' + esc(v.username) + '"></div>' +
+    '<div class="field"><label for="nu-p">Passwort (mindestens 8 Zeichen)</label><input id="nu-p" type="password" required autocomplete="new-password"></div>' +
+    '<div class="actions"><button type="button" class="btn ghost" data-close>Abbrechen</button><button class="btn" type="submit">Nutzer anlegen</button></div></form>');
+  $('nu-form').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const body = { username: $('nu-n').value.trim(), password: $('nu-p').value };
+    const r = await api('auth', 'POST', '/api/users', body);
+    if (!r.ok) return newUserDialog(r.status === 409 ? 'Dieser Benutzername ist schon vergeben.' : problem(r), body);
+    closeModal(); await loadUsers(); render();
+  });
+}
+
+// ---------- Klicks im Hauptbereich ----------
+$('main').addEventListener('click', async (ev) => {
+  const el = ev.target.closest('button'); if (!el) return;
+  if (el.dataset.open) { const t = state.tickets.find((x) => x.id === Number(el.dataset.open)); if (t) ticketDialog(t); }
+  else if ('new' in el.dataset) newTicketDialog();
+  else if ('newuser' in el.dataset) newUserDialog();
+  else if (el.dataset.page) { state.page += Number(el.dataset.page); render(); }
+  else if ('reloadLogs' in el.dataset) { await loadLogs(); render(); }
+});
+$('modal').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-act]'); if (b) ticketAction(b.dataset.act, b.dataset.id, b); });
+$('main').addEventListener('input', (ev) => { if (ev.target.dataset.filter === 'q') { state.filter.q = ev.target.value; state.page = 1; const pos = ev.target.selectionStart; render(); const i = $('f-q'); i.focus(); i.setSelectionRange(pos, pos); } });
+$('main').addEventListener('change', async (ev) => {
+  const k = ev.target.dataset.filter, lk = ev.target.dataset.logfilter;
+  if (k && k !== 'q') { state.filter[k] = ev.target.value; state.page = 1; render(); }
+  if (lk) { state.logFilter[lk] = ev.target.value; if (lk === 'limit') await loadLogs(); render(); }
+});
+
+// ---------- Diagnose ----------
+function viewDiag() {
+  return '<div class="top"><h1>Diagnose</h1></div>' +
+    '<div class="panel"><h2>Services</h2><div class="muted">Prüft, ob auth-api, ticketapi und logging-api antworten.</div>' +
+    '<p><button class="btn" id="d-health">Alle Services prüfen</button></p><div id="d-health-out"></div></div>' +
+    '<div class="panel"><h2>Demo-Durchlauf</h2><div class="muted">Legt einen Test-Nutzer und ein Test-Ticket an, bearbeitet das Ticket bis zum Abschluss und prüft, ob auth-api und ticketapi ins Logging schreiben.</div>' +
+    '<p><button class="btn" id="d-demo">Demo-Durchlauf starten</button></p><ol class="steps" id="d-demo-out"></ol></div>';
+}
+function bindDiag() {
+  $('d-health').addEventListener('click', async () => {
+    const out = $('d-health-out'); out.textContent = 'Prüfe ...';
+    const probes = [['auth-api', 'auth', '/api/users'], ['ticketapi', 'tickets', '/api/ticket'], ['logging-api', 'logs', '/api/logs?limit=1']];
+    const res = await Promise.all(probes.map(async ([n, s, p]) => ({ n, r: await api(s, 'GET', p) })));
+    out.innerHTML = res.map(({ n, r }) => {
+      const up = !r.net && !r.down && r.status !== 0;
+      return '<div>' + badge(up ? 'Erledigt' : 'Error', up ? 'erreichbar' : 'nicht erreichbar') + ' ' + esc(n) + (up ? ' (' + r.status + ')' : ' - ' + esc(problem(r))) + '</div>';
+    }).join('');
+  });
+  $('d-demo').addEventListener('click', runDemo);
+}
+async function runDemo() {
+  const list = $('d-demo-out'), btn = $('d-demo'); list.innerHTML = ''; btn.disabled = true;
+  const stamp = Date.now().toString().slice(-6), user = 'demo' + stamp, pw = 'Sicher123!', ctx = {};
   const has = (a, id) => Array.isArray(a) && a.some((t) => t.id === id);
-  const logHas = (logs, text) => Array.isArray(logs) && logs.some((l) => typeof l.message === 'string' && l.message.includes(text));
+  const logHas = (a, s) => Array.isArray(a) && a.some((l) => typeof l.message === 'string' && l.message.includes(s));
+  const need = (k, f) => async () => ctx[k] ? f() : { skip: true };
   const steps = [
-    { t: 'User anlegen', id: 'users-create', v: () => ({ username: user, password: pw }),
-      ok: (d) => { ctx.user = d; setField('login-username', user); setField('login-password', pw); } },
-    { t: 'Gleichen User nochmal anlegen (409 erwartet)', id: 'users-create', v: () => ({ username: user, password: pw }), expect: 409, needs: 'user' },
-    { t: 'Login mit richtigem Passwort', id: 'login', v: () => ({ username: user, password: pw }), needs: 'user',
-      ok: (d) => { ctx.me = d; setSession(d); },
-      verify: (d) => (d.username === user ? [] : ['Antwort enthält einen anderen Benutzernamen']) },
-    { t: 'Login mit falschem Passwort (401 erwartet)', id: 'login', v: () => ({ username: user, password: 'falsch-falsch' }), expect: 401, needs: 'user' },
-    { t: 'Ticket anlegen (Kategorie Logging, Start-Level 1)', id: 'ticket-create',
-      v: () => ({ titel: 'Demo-Ticket ' + stamp, beschreibung: 'Automatisch angelegt vom Demo-Durchlauf', kategorie: 'Logging', ersteller: user }), needs: 'me',
-      ok: (d) => { ctx.ticket = d; setTicketId(d.id); },
-      verify: (d) => [...(d.status === 'Offen' ? [] : ['Neues Ticket sollte Status Offen haben']), ...(d.level === 1 ? [] : ['Kategorie Logging sollte auf Level 1 starten'])] },
-    { t: 'Ticket übernehmen', id: 'ticket-take', v: () => ({ id: String(ctx.ticket.id), bearbeiter: user }), needs: 'ticket',
-      verify: (d) => [...(d.status === 'InBearbeitung' ? [] : ['Status sollte InBearbeitung sein']), ...(d.bearbeiter === user ? [] : ['bearbeiter sollte gesetzt sein'])] },
-    { t: 'Meine Tickets enthalten das Ticket', id: 'ticket-mine', v: () => ({ bearbeiter: user }), needs: 'ticket',
-      verify: (d) => (has(d, ctx.ticket.id) ? [] : ['Das übernommene Ticket fehlt in "meine"']) },
-    { t: 'Ticket eskalieren (Level 1 auf 2, wieder Offen)', id: 'ticket-escalate', v: () => ({ id: String(ctx.ticket.id) }), needs: 'ticket',
-      verify: (d) => [...(d.level === 2 ? [] : ['Level sollte 2 sein']), ...(d.status === 'Offen' ? [] : ['Status sollte wieder Offen sein']), ...(d.bearbeiter === null ? [] : ['bearbeiter sollte leer sein'])] },
-    { t: 'Ticket erneut übernehmen', id: 'ticket-take', v: () => ({ id: String(ctx.ticket.id), bearbeiter: user }), needs: 'ticket' },
-    { t: 'Ticket erledigen', id: 'ticket-done', v: () => ({ id: String(ctx.ticket.id) }), needs: 'ticket',
-      verify: (d) => (d.status === 'Erledigt' ? [] : ['Status sollte Erledigt sein']) },
-    { t: 'Erledigtes Ticket ist nicht mehr in der Liste offener Tickets', id: 'ticket-list', v: () => ({ level: '' }), needs: 'ticket',
-      verify: (d) => (has(d, ctx.ticket.id) ? ['Erledigtes Ticket steht noch in der offenen Liste'] : []) },
-    { t: 'Verbindung ticketapi zu logging-api: Log "Ticket ... erstellt" vorhanden', id: 'log-read', v: () => ({ limit: '200' }), needs: 'ticket',
-      verify: (d) => (logHas(d, 'Ticket ' + ctx.ticket.id + ' erstellt') ? [] : ['Kein Log-Eintrag zu diesem Ticket. Erreicht die ticketapi die logging-api (http://logging-api:8080)? docker compose logs ticketapi prüfen.']) },
-    { t: 'Verbindung auth-api zu logging-api: Log "Login erfolgreich" vorhanden', id: 'log-read', v: () => ({ limit: '200' }), needs: 'me',
-      verify: (d) => (logHas(d, 'UserId=' + ctx.me.id) ? [] : ['Kein Log-Eintrag zum Login. Erreicht die auth-api die logging-api (LoggingService__BaseUrl in docker-compose.yml)? docker compose logs auth-api prüfen.']) },
+    ['Nutzer anlegen', async () => { const r = await api('auth', 'POST', '/api/users', { username: user, password: pw }); return r.status === 201 ? (ctx.user = r.data, {}) : { r }; }],
+    ['Gleichen Nutzer nochmal anlegen (409 erwartet)', need('user', async () => { const r = await api('auth', 'POST', '/api/users', { username: user, password: pw }); return r.status === 409 ? {} : { r }; })],
+    ['Login mit richtigem Passwort', need('user', async () => { const r = await api('auth', 'POST', '/api/auth/login', { username: user, password: pw }); if (r.status !== 200) return { r }; ctx.me = r.data; return r.data.username === user ? {} : { why: 'Antwort enthält einen anderen Benutzernamen' }; })],
+    ['Login mit falschem Passwort (401 erwartet)', need('user', async () => { const r = await api('auth', 'POST', '/api/auth/login', { username: user, password: 'falsch-falsch' }); return r.status === 401 ? {} : { r }; })],
+    ['Ticket anlegen (Kategorie Logging, Start-Level 1)', need('me', async () => { const r = await api('tickets', 'POST', '/api/ticket', { titel: 'Demo-Ticket ' + stamp, beschreibung: 'Automatisch angelegt vom Demo-Durchlauf', kategorie: 'Logging', ersteller: user }); if (!r.ok) return { r }; ctx.t = r.data; return r.data.status === 'Offen' && r.data.level === 1 ? {} : { why: 'Neues Ticket sollte Status Offen und Level 1 haben' }; })],
+    ['Ticket übernehmen', need('t', async () => { const r = await api('tickets', 'POST', '/api/ticket/' + ctx.t.id + '/uebernehmen', { bearbeiter: user }); if (!r.ok) return { r }; return r.data.status === 'InBearbeitung' && r.data.bearbeiter === user ? {} : { why: 'Status sollte InBearbeitung und Bearbeiter gesetzt sein' }; })],
+    ['Meine Tickets enthalten das Ticket', need('t', async () => { const r = await api('tickets', 'GET', '/api/ticket/meine?bearbeiter=' + encodeURIComponent(user)); if (!r.ok) return { r }; return has(r.data, ctx.t.id) ? {} : { why: 'Das übernommene Ticket fehlt in "meine"' }; })],
+    ['Ticket eskalieren (Level 2, wieder Offen)', need('t', async () => { const r = await api('tickets', 'POST', '/api/ticket/' + ctx.t.id + '/eskalieren'); if (!r.ok) return { r }; return r.data.level === 2 && r.data.status === 'Offen' && r.data.bearbeiter === null ? {} : { why: 'Level sollte 2, Status Offen und Bearbeiter leer sein' }; })],
+    ['Ticket erneut übernehmen', need('t', async () => { const r = await api('tickets', 'POST', '/api/ticket/' + ctx.t.id + '/uebernehmen', { bearbeiter: user }); return r.ok ? {} : { r }; })],
+    ['Ticket erledigen', need('t', async () => { const r = await api('tickets', 'POST', '/api/ticket/' + ctx.t.id + '/erledigen'); if (!r.ok) return { r }; return r.data.status === 'Erledigt' ? {} : { why: 'Status sollte Erledigt sein' }; })],
+    ['Erledigtes Ticket fehlt in der Liste offener Tickets', need('t', async () => { const r = await api('tickets', 'GET', '/api/ticket'); if (!r.ok) return { r }; return has(r.data, ctx.t.id) ? { why: 'Erledigtes Ticket steht noch in der offenen Liste' } : {}; })],
+    ['ticketapi schreibt ins Logging ("Ticket ... erstellt")', need('t', async () => { const r = await api('logs', 'GET', '/api/logs?limit=200'); if (!r.ok) return { r }; return logHas(r.data, 'Ticket ' + ctx.t.id + ' erstellt') ? {} : { why: 'Kein Logeintrag zu diesem Ticket. Erreicht die ticketapi die logging-api? docker compose logs ticketapi prüfen.' }; })],
+    ['auth-api schreibt ins Logging ("Login erfolgreich")', need('me', async () => { const r = await api('logs', 'GET', '/api/logs?limit=200'); if (!r.ok) return { r }; return logHas(r.data, 'UserId=' + ctx.me.id) ? {} : { why: 'Kein Logeintrag zum Login. Erreicht die auth-api die logging-api? docker compose logs auth-api prüfen.' }; })],
   ];
-  for (const s of steps) {
-    const li = h('li', {}, s.t + ': ');
-    list.append(li);
-    if (s.needs && !ctx[s.needs]) {
-      li.append(h('span', { class: 'tag t-net' }, 'übersprungen (ein früherer Schritt ist fehlgeschlagen)'));
-      continue;
-    }
-    const def = byId(s.id);
-    const r = await send(def, defaultsOf(def, s.v()));
-    let good, problems = r.problems.slice();
-    if (s.expect) {
-      good = r.status === s.expect;
-      if (!good && r.state !== 'net') problems = ['Erwartet war Status ' + s.expect + ', geliefert wurde ' + r.status];
-    } else {
-      good = r.state === 'ok';
-      if (good && s.verify) { const extra = s.verify(r.data); if (extra.length) { good = false; problems = extra; } }
-    }
-    if (good && s.ok && r.data) s.ok(r.data);
-    li.append(h('span', { class: 'tag t-' + (good ? 'ok' : (r.state === 'net' ? 'net' : 'bad')) }, good ? 'OK' : (r.state === 'net' ? 'nicht erreichbar' : 'Fehler')),
-      ' ' + (r.status ?? '') + ' · ' + r.ms + ' ms');
-    if (!good) {
-      const msg = problems.length ? problems : [r.text || ('Status ' + r.status)];
-      li.append(h('ul', { class: 'problems' }, msg.map((p) => h('li', {}, p))));
-    }
+  for (const [title, fn] of steps) {
+    const li = document.createElement('li'); li.textContent = title + ': '; list.append(li);
+    const res = await fn();
+    if (res.skip) { li.insertAdjacentHTML('beforeend', badge('Warning', 'übersprungen')); continue; }
+    if (!res.r && !res.why) { li.insertAdjacentHTML('beforeend', badge('Erledigt', 'OK')); continue; }
+    const why = res.why || ('Unerwarteter Status ' + res.r.status + '. ' + problem(res.r));
+    li.insertAdjacentHTML('beforeend', badge('Error', 'Fehler') + ' <span class="why">' + esc(why) + '</span>');
   }
   btn.disabled = false;
 }
 
-render();
-$('btn-health').addEventListener('click', checkHealth);
-$('btn-proxy').addEventListener('click', () => setBases(PROXY));
-$('btn-direct').addEventListener('click', () => setBases(DIRECT));
-$('btn-demo').addEventListener('click', runDemo);
+// ---------- Start ----------
+state.me = loadMe();
+if (state.me) enterApp('start'); else { $('login').classList.remove('hidden'); setMode(false); }
 </script>
 </body>
 </html>
