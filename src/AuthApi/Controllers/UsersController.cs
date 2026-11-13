@@ -20,44 +20,40 @@ public class UsersController : ControllerBase
         _db = db;
         _passwordHasher = passwordHasher;
     }
-    [HttpPost]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
-    {
-        // Prüfen, ob Benutzername oder E-Mail bereits existiert
-        if (await _db.Users.AnyAsync(u =>
-            u.Username == request.Username || u.Email == request.Email))
-        {
-            return Conflict("Benutzername oder E-Mail bereits vergeben.");
-        }
 
-        // Prüfen, ob die Supportrolle existiert
-        if (!await _db.Roles.AnyAsync(r => r.Id == request.RoleId))
+    [HttpPost]
+    public async Task<IActionResult> Register(
+        [FromBody] RegisterRequest request)
+    {
+        // Prüfen, ob der Benutzername bereits existiert
+        if (await _db.Users.AnyAsync(
+            u => u.Username == request.Username))
         {
-            return BadRequest("Diese Supportrolle existiert nicht.");
+            return Conflict("Benutzername bereits vergeben.");
         }
 
         // Neuen Benutzer erstellen
         var user = new User
         {
             Username = request.Username,
-            Email = request.Email,
-            RoleId = request.RoleId
+            Role = UserRole.User,
+            SupportLevel = 1
         };
 
-        // Passwort sicher hashen
-        user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
+        // Passwort hashen
+        user.PasswordHash = _passwordHasher.HashPassword(
+            user, request.Password);
 
         // Benutzer in SQL speichern
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
 
-        // Erfolgreiche Registrierung
         return StatusCode(201, new
         {
             user.Id,
             user.Username,
-            user.Email,
-            user.RoleId
+            Role = user.Role.ToString(),
+            user.SupportLevel
         });
     }
 
@@ -69,12 +65,19 @@ public class UsersController : ControllerBase
             {
                 u.Id,
                 u.Username,
-                u.Email,
-                u.IsActive,
-                Role = u.Role.Name
+                u.Role,
+                u.SupportLevel,
+                u.IsActive
             })
             .ToListAsync();
 
-        return Ok(users);
+        return Ok(users.Select(u => new
+        {
+            u.Id,
+            u.Username,
+            Role = u.Role.ToString(),
+            u.SupportLevel,
+            u.IsActive
+        }));
     }
 }

@@ -1,5 +1,6 @@
 using AuthApi.Data;
 using AuthApi.Models;
+using AuthApi.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 
@@ -9,6 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddHttpClient<LogClient>(client =>
+{
+    var url = builder.Configuration["LoggingService:BaseUrl"]
+        ?? "http://localhost:5003";
+
+    client.BaseAddress = new Uri(url.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(2);
+});
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -41,16 +50,9 @@ if (app.Environment.IsDevelopment())
 
     db.Database.Migrate();
 
-    if (!db.Roles.Any())
-    {
-        db.Roles.AddRange(
-            new Role { Name = "First Support", Level = 1 },
-            new Role { Name = "Second Support", Level = 2 },
-            new Role { Name = "Third Support", Level = 3 }
-        );
 
-        db.SaveChanges();
-    }
+
+   
 }
 
 app.Run();

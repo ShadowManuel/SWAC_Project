@@ -1,5 +1,11 @@
 ﻿namespace AuthApi.Models;
 
+public enum UserRole
+{
+    User,
+    Admin
+}
+
 public class User
 {
     public int Id { get; set; }
