@@ -75,6 +75,26 @@ services:
       - log-db
 
 
+  ticket-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${TICKET_DB_PASSWORD}
+      MSSQL_MEMORY_LIMIT_MB: 2048
+    volumes: [ticket-db-data:/var/opt/mssql]
+    networks: [ticket-db]
+
+  ticketapi:
+    build:
+      context: .
+      dockerfile: src/ticketapi/Dockerfile
+    ports: ["5002:8080"]
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__TicketDb: "Server=ticket-db;Database=SimsTickets;User Id=sa;Password=${TICKET_DB_PASSWORD};TrustServerCertificate=True"
+    networks: [app, ticket-db]
+    depends_on: [ticket-db]
+    restart: on-failure
 
 networks:
   app:

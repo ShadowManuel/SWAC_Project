@@ -2,4 +2,5 @@
   <Project Path="src/logging-service/logging-service.csproj" />
   <Project Path="src/AuthApi/AuthApi.csproj" Id="58e2c761-bb94-4203-aa95-ea0ff43c044e" />
   <Project Path="src/simsapi/simsapi.csproj" />
+  <Project Path="src/ticketapi/ticketapi.csproj" Id="8c60e065-c614-4c97-a56f-1b70b0a781aa" />
 </Solution>
